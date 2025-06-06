@@ -1,0 +1,60 @@
+{% extends 'chat/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Meu Perfil</h2>
+    
+    <div class="card">
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row mb-3">
+                    <div class="col-md-4 text-center">
+                        {% if perfil.foto_perfil %}
+                            <img src="{{ perfil.foto_perfil.url }}" class="img-fluid rounded-circle" alt="Foto de Perfil" style="max-width: 150px;">
+                        {% else %}
+                            <img src="https://via.placeholder.com/150" class="img-fluid rounded-circle" alt="Foto de Perfil" style="max-width: 150px;">
+                        {% endif %}
+                        <br>
+                        <label for="id_foto_perfil" class="mt-2">Alterar Foto de Perfil</label>
+                        <input type="file" class="form-control" name="foto_perfil" id="id_foto_perfil">
+                    </div>
+                    <div class="col-md-8">
+                        <div class="mb-3">
+                            <label for="id_status" class="form-label">Status</label>
+                            <input type="text" class="form-control" name="status" id="id_status" value="{{ perfil.status }}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_biografia" class="form-label">Biografia</label>
+                            <textarea class="form-control" name="biografia" id="id_biografia" rows="3">{{ perfil.biografia }}</textarea>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Salvar Alterações</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<style>
+    .img-fluid {
+        border-radius: 50%;
+    }
+
+    .card {
+        border-radius: 15px;
+    }
+
+    .form-control {
+        border-radius: 10px;
+    }
+
+    .btn {
+        border-radius: 25px;
+    }
+
+    .form-label {
+        font-weight: bold;
+    }
+</style>

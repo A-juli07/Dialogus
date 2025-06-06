@@ -1,0 +1,12 @@
+{% extends 'chat/base.html' %}
+
+{% block content %}
+<h3>Sala Privada: {{ sala.nome }}</h3>
+<p>Digite a senha para entrar:</p>
+<form method="post">
+    {% csrf_token %}
+    <input type="password" name="senha" class="form-control mb-3" required>
+    <button type="submit" class="btn btn-primary">Entrar</button>
+</form>
+<a href="{% url 'salas' %}" class="btn btn-link mt-2">Cancelar</a>
+{% endblock %}

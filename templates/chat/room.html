@@ -1,0 +1,134 @@
+{% extends 'chat/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Título da sala -->
+    <h2 class="mb-3">
+        {% if '_' in room_name %}
+            <span class="badge bg-primary">Sala Privada (DM)</span>
+        {% else %}
+            <span class="badge bg-secondary">Sala: {{ room_name }}</span>
+        {% endif %}
+        <!-- Contador de novas mensagens não lidas -->
+    </h2>
+
+    <!-- Exibição das mensagens -->
+    <div id="chat-log" class="border rounded p-3 mb-3" style="height: 300px; overflow-y: scroll;">
+        {% for msg in mensagens %}
+            <div class="chat-message {% if msg.usuario == user %}my-message{% else %}other-message{% endif %}">
+                <strong>{{ msg.usuario.username }}:</strong>
+                <span>{{ msg.conteudo }}</span>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Formulário de envio de mensagem -->
+    <div class="input-group mb-3">
+        <input id="chat-message-input" type="text" class="form-control" placeholder="Digite sua mensagem...">
+        <button id="chat-message-submit" class="btn btn-primary">Enviar</button>
+    </div>
+</div>
+
+<script>
+    const roomName = "{{ room_name }}";
+    const userLogged = "{{ user.username }}";  // Usuário logado (do Django)
+    const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + roomName + '/');
+
+    // Quando receber uma mensagem do WebSocket
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        // Verifica se a mensagem é do usuário logado para aplicar a classe certa
+        const messageClass = data.username === userLogged ? 'my-message' : 'other-message';
+        
+        // Adiciona a mensagem ao chat
+        document.querySelector('#chat-log').innerHTML += (
+            `<div class="chat-message ${messageClass}">
+                <strong>${data.username}:</strong>
+                <span>${data.message}</span>
+            </div>`
+        );
+
+        // Scroll para o final do chat
+        const chatLog = document.getElementById('chat-log');
+        chatLog.scrollTop = chatLog.scrollHeight;
+    };
+
+    // Envia a mensagem para o WebSocket
+    document.querySelector('#chat-message-submit').onclick = function(e) {
+        const messageInputDom = document.querySelector('#chat-message-input');
+        const message = messageInputDom.value;
+        chatSocket.send(JSON.stringify({ 'message': message }));
+        messageInputDom.value = '';  // Limpa o campo de input
+    };
+</script>
+
+<style>
+    .chat-message {
+        margin-bottom: 10px;
+        padding: 5px;
+        border-radius: 5px;
+        background-color: #f8f9fa;
+        max-width: 70%;  /* Limita o tamanho das mensagens */
+        word-wrap: break-word;
+    }
+
+    /* Mensagens do usuário logado (lado direito) */
+    .my-message {
+        background-color: #d1e7dd; /* Cor diferente para as mensagens do usuário */
+        margin-left: auto;
+        text-align: right;
+    }
+
+    /* Mensagens dos outros usuários (lado esquerdo) */
+    .other-message {
+        background-color: #e9ecef; /* Cor diferente para mensagens dos outros */
+        margin-right: auto;
+        text-align: left;
+    }
+
+    .chat-message strong {
+        color: #007bff;
+    }
+
+    /* Sala privada (DM) */
+    .badge.bg-primary {
+        background-color: #007bff !important;
+    }
+
+    /* Sala de grupo */
+    .badge.bg-secondary {
+        background-color: #6c757d !important;
+    }
+
+    /* Estilos de entrada de mensagem */
+    #chat-message-input {
+        border-radius: 25px;
+    }
+
+    #chat-message-submit {
+        border-radius: 25px;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    /* Responsividade para telas pequenas */
+    @media (max-width: 768px) {
+        .chat-message {
+            font-size: 14px;
+        }
+        #chat-log {
+            height: 200px;
+        }
+        #chat-message-input {
+            width: 75%;
+        }
+    }
+
+    /* Responsividade para telas maiores */
+    @media (min-width: 769px) {
+        #chat-log {
+            height: 300px;
+        }
+    }
+</style>
+{% endblock %}

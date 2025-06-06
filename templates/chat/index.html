@@ -1,0 +1,152 @@
+{% extends 'chat/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Título Mensagens Diretas -->
+    <h2 class="mb-4">Mensagens Diretas</h2>
+    
+    <!-- Lista de Mensagens Diretas -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <ul class="list-group">
+                {% for dm in dms %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {% if dm.usuario1 == user %}
+                            <a href="{% url 'room' room_name=dm.get_nome_sala %}" class="text-decoration-none">{{ dm.usuario2.username }}</a>
+                        {% else %}
+                            <a href="{% url 'room' room_name=dm.get_nome_sala %}" class="text-decoration-none">{{ dm.usuario1.username }}</a>
+                        {% endif %}
+                    </li>
+                {% empty %}
+                    <li class="list-group-item">Você ainda não tem mensagens diretas.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Botão para Enviar Convite -->
+    <div class="text-center mb-4">
+        <a href="{% url 'enviar_convite' %}" class="btn btn-primary w-100">Enviar Convite por ID</a>
+    </div>
+
+    <!-- Título Convites Recebidos e Enviados -->
+    <h3 class="mb-3">Convites</h3>
+
+    <!-- Grid para Convites Recebidos e Enviados -->
+    <div class="row">
+        <!-- Convites Recebidos -->
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Convites Recebidos</h5>
+                    <ul class="list-group">
+                        {% for convite in convites_recebidos %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>{{ convite.remetente.username }}</span>
+                                <div>
+                                    <a href="{% url 'aceitar_convite' convite.id %}" class="btn btn-sm btn-success me-2"><i class="bi bi-check-lg"></i> Aceitar</a>
+                                    <a href="{% url 'rejeitar_convite_dm' convite.id %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-x-lg"></i> Rejeitar</a>
+                                </div>
+                            </li>
+                        {% empty %}
+                            <li class="list-group-item">Nenhum convite recebido.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Convites Enviados -->
+        <div class="col-md-6 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Convites Enviados</h5>
+                    <ul class="list-group">
+                        {% for convite in convites_enviados %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>{{ convite.destinatario.username }}</span>
+                                <a href="{% url 'cancelar_convite_dm' convite.id %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-x-circle"></i> Cancelar</a>
+                            </li>
+                        {% empty %}
+                            <li class="list-group-item">Você não enviou nenhum convite.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+<style>
+    /* Estilos para os botões */
+    .btn {
+        border-radius: 25px;
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+    }
+
+    .btn-success {
+        background-color: #28a745;
+        border: none;
+    }
+
+    .btn-outline-danger {
+        color: #dc3545;
+        border-color: #dc3545;
+    }
+
+    .btn-outline-danger:hover {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .list-group-item {
+        border-radius: 15px;
+        padding: 15px;
+    }
+
+    /* Cartões de convite */
+    .card {
+        border-radius: 15px;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    /* Adicionar ícones nos botões */
+    .bi {
+        margin-right: 5px;
+    }
+
+    .text-decoration-none {
+        text-decoration: none;
+    }
+
+    /* Estilo para as mensagens diretas */
+    .list-group-item {
+        background-color: #f8f9fa;
+    }
+    
+    .list-group-item:hover {
+        background-color: #e9ecef;
+    }
+
+    /* Ajustes de layout */
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    /* Para garantir que o texto dentro da lista esteja alinhado corretamente */
+    .list-group-item .btn {
+        margin-left: auto;
+    }
+</style>

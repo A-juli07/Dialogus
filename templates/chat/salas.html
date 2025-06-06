@@ -1,0 +1,74 @@
+{% extends 'chat/base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Salas de Chat</h2>
+
+    <!-- Salas Públicas -->
+    <div class="mb-4">
+        <h4>Salas Públicas</h4>
+        <div class="row">
+            {% for sala in salas_publicas %}
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ sala.nome }}</h5>
+                            <a href="{% url 'room' room_name=sala.nome %}" class="btn btn-primary w-100">Entrar</a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p>Não há salas públicas disponíveis.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Minhas Salas Privadas -->
+    <div>
+        <h4>Minhas Salas Privadas</h4>
+        <div class="row">
+            {% for sala in minhas_salas_privadas %}
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ sala.nome }}</h5>
+                            <a href="{% url 'room' room_name=sala.nome %}" class="btn btn-secondary w-100">Entrar</a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p>Você não tem salas privadas.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<style>
+    .card {
+        border-radius: 10px;
+    }
+
+    .card-body {
+        text-align: center;
+    }
+
+    .btn {
+        border-radius: 25px;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        border: none;
+    }
+
+    .card-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+</style>
