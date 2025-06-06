@@ -85,44 +85,20 @@ Você pode acessar o painel de administração do Django, se desejar, indo para 
 
 Use o superusuário criado anteriormente para fazer login.
 
-##Funções do Sistema
-Registrar novo usuário: O sistema permite que novos usuários se registrem e criem uma conta.
+## Funções do Sistema
+- Registrar novo usuário: O sistema permite que novos usuários se registrem e criem uma conta.
+- Login e Logout: Usuários podem se logar e se deslogar facilmente.
+- Mensagens Diretas: Envio de mensagens privadas entre dois usuários (sem a necessidade de um grupo de chat).
+- Salas Públicas e Privadas: Usuários podem entrar em salas públicas e privadas ou criar novas.
+- Convites: Usuários podem enviar convites para outros entrarem em salas privadas ou iniciar conversas de DM.
+- Perfil de Usuário: A tela de perfil permite que o usuário edite a foto de perfil, status e biografia.
 
-Login e Logout: Usuários podem se logar e se deslogar facilmente.
+## Estrutura do Projeto
 
-Mensagens Diretas: Envio de mensagens privadas entre dois usuários (sem a necessidade de um grupo de chat).
-
-Salas Públicas e Privadas: Usuários podem entrar em salas públicas e privadas ou criar novas.
-
-Convites: Usuários podem enviar convites para outros entrarem em salas privadas ou iniciar conversas de DM.
-
-Perfil de Usuário: A tela de perfil permite que o usuário edite a foto de perfil, status e biografia.
-
-Estrutura do Projeto
 chat/: O aplicativo principal que contém as funcionalidades de chat, como envio de mensagens e gerenciamento de salas.
-
 models.py: Definição de modelos para salas, mensagens e perfis.
-
 views.py: Lógica das páginas de chat e perfil.
-
 urls.py: Definição das URLs do sistema.
-
 templates/: Contém os templates HTML das páginas.
-
 settings.py: Arquivo de configuração do Django, onde você pode ajustar os detalhes do banco de dados, canais, e outras configurações.
-
 urls.py: Arquivo onde as URLs do projeto são definidas.
-
-Considerações Finais
-Esse é o esqueleto básico do seu projeto Dialogus. Com o tempo, você pode expandir as funcionalidades, como a adição de notificações em tempo real, transcrição de mensagens de voz, e análise de sentimentos nas conversas.
-
-Caso precise de mais alguma melhoria ou ajuda, não hesite em me chamar! 😊
-
-yaml
-Copiar
-
----
-
-Agora, você pode simplesmente **copiar e colar** o conteúdo acima no seu arquivo `README.md`. Isso fornecerá uma descrição completa do seu projeto, explicando as funcionalidades, como rodar o projeto localmente e os próximos passos para expansão.
-
-Se precisar de mais alguma coisa, me avise! 😄
