@@ -33,7 +33,7 @@ Crie um ambiente virtual para isolar as dependências do projeto:
 cd dialogus
 python -m venv venv
 ```
-###3. Ativar o Ambiente Virtual
+### 3. Ativar o Ambiente Virtual
 Ative o ambiente virtual.
 
 Windows:
@@ -44,14 +44,14 @@ Mac/Linux:
 ```bash
 source venv/bin/activate
 ```
-###4. Instalar as Dependências
+### 4. Instalar as Dependências
 Com o ambiente virtual ativado, instale as dependências do projeto:
 
 ```bash
 pip install -r requirements.txt
 As dependências incluem Django, Channels, Redis, entre outras.
 ```
-###5. Configurar o Redis
+### 5. Configurar o Redis
 O Django Channels usa Redis para a camada de canais WebSocket. Certifique-se de ter o Redis instalado e em execução. Você pode seguir o guia de instalação do Redis para o seu sistema operacional.
 
 Iniciar o Redis:
@@ -59,28 +59,28 @@ Iniciar o Redis:
 ```bash
 redis-server
 ```
-###6. Configurar o Banco de Dados
+### 6. Configurar o Banco de Dados
 Execute as migrações para configurar o banco de dados (utilizando SQLite, por padrão):
 
 ```bash
 python manage.py migrate
 ```
-###7. Criar um Superusuário (Opcional)
+### 7. Criar um Superusuário (Opcional)
 Se desejar acessar o painel de administração do Django, crie um superusuário:
 ```bash
 python manage.py createsuperuser
 ```
-###8. Rodar o Servidor Localmente
+### 8. Rodar o Servidor Localmente
 Inicie o servidor de desenvolvimento do Django para rodar o projeto localmente:
 ```bash
 python manage.py runserver
 ```
 O projeto estará acessível no endereço http://127.0.0.1:8000.
 
-###9. Testar o WebSocket
+### 9. Testar o WebSocket
 Para testar as funcionalidades de chat em tempo real, você precisará abrir múltiplas abas no navegador e se conectar ao WebSocket. O WebSocket será automaticamente gerenciado pelo Django Channels.
 
-###10. Acessar a Interface do Admin (Opcional)
+### 10. Acessar a Interface do Admin (Opcional)
 Você pode acessar o painel de administração do Django, se desejar, indo para http://127.0.0.1:8000/admin.
 
 Use o superusuário criado anteriormente para fazer login.
