@@ -95,10 +95,10 @@ Use o superusuário criado anteriormente para fazer login.
 
 ## Estrutura do Projeto
 
-chat/: O aplicativo principal que contém as funcionalidades de chat, como envio de mensagens e gerenciamento de salas.
-models.py: Definição de modelos para salas, mensagens e perfis.
-views.py: Lógica das páginas de chat e perfil.
-urls.py: Definição das URLs do sistema.
-templates/: Contém os templates HTML das páginas.
-settings.py: Arquivo de configuração do Django, onde você pode ajustar os detalhes do banco de dados, canais, e outras configurações.
-urls.py: Arquivo onde as URLs do projeto são definidas.
+- chat/: O aplicativo principal que contém as funcionalidades de chat, como envio de mensagens e gerenciamento de salas.
+- models.py: Definição de modelos para salas, mensagens e perfis.
+- views.py: Lógica das páginas de chat e perfil.
+- urls.py: Definição das URLs do sistema.
+- templates/: Contém os templates HTML das páginas.
+- settings.py: Arquivo de configuração do Django, onde você pode ajustar os detalhes do banco de dados, canais, e outras configurações.
+- urls.py: Arquivo onde as URLs do projeto são definidas.
