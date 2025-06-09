@@ -33,8 +33,8 @@
                         <div class="card-body">
                             <h5 class="card-title">{{ sala.nome }}</h5>
                             <a href="{% url 'room' room_name=sala.nome %}" class="btn btn-secondary w-100">Entrar</a>
-                            <a href="{% url 'aceitar_convite' token=sala.token %}" class="btn btn-sm btn-outline-secondary float-end">Link de convite</a>
                         </div>
+                        <a href="{% url 'aceitar_convite' token=sala.token %}" class="btn btn-sm btn-outline-secondary float-end">Link de convite</a>
                     </div>
                 </div>
             {% empty %}
@@ -43,7 +43,7 @@
         </div>
     </div>
 
-    <h2>Salas Privadas Acessadas</h2>
+    <h4>Salas Privadas Acessadas</h4>
         <div class="row">
             {% for sala in salas_autorizadas %}
                 <div class="col-md-4 mb-3">
