@@ -31,36 +31,55 @@
 
 <script>
     const roomName = "{{ room_name }}";
-    const userLogged = "{{ user.username }}";  // Usuário logado (do Django)
+    const userLogged = "{{ user.username }}";
     const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + roomName + '/');
 
-    // Quando receber uma mensagem do WebSocket
+    // Recebe mensagens do WebSocket
     chatSocket.onmessage = function(e) {
         const data = JSON.parse(e.data);
-        // Verifica se a mensagem é do usuário logado para aplicar a classe certa
         const messageClass = data.username === userLogged ? 'my-message' : 'other-message';
-        
-        // Adiciona a mensagem ao chat
-        document.querySelector('#chat-log').innerHTML += (
-            `<div class="chat-message ${messageClass}">
+
+        const newMessage = `
+            <div class="chat-message ${messageClass}">
                 <strong>${data.username}:</strong>
                 <span>${data.message}</span>
-            </div>`
-        );
+            </div>
+        `;
 
-        // Scroll para o final do chat
-        const chatLog = document.getElementById('chat-log');
+        const chatLog = document.querySelector('#chat-log');
+        chatLog.innerHTML += newMessage;
         chatLog.scrollTop = chatLog.scrollHeight;
     };
 
-    // Envia a mensagem para o WebSocket
-    document.querySelector('#chat-message-submit').onclick = function(e) {
-        const messageInputDom = document.querySelector('#chat-message-input');
-        const message = messageInputDom.value;
-        chatSocket.send(JSON.stringify({ 'message': message }));
-        messageInputDom.value = '';  // Limpa o campo de input
+    // Conexão fechada ou erro
+    chatSocket.onclose = function(e) {
+        console.error('Chat socket fechado inesperadamente.');
     };
+
+    // Função de envio
+    function sendMessage() {
+        const messageInputDom = document.querySelector('#chat-message-input');
+        const message = messageInputDom.value.trim();
+        if (message.length > 0) {
+            chatSocket.send(JSON.stringify({ 'message': message }));
+            messageInputDom.value = '';
+        }
+    }
+
+    // Clique no botão
+    document.querySelector('#chat-message-submit').onclick = function(e) {
+        sendMessage();
+    };
+
+    // Pressionar Enter
+    document.querySelector('#chat-message-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
 </script>
+
 
 <style>
     .chat-message {
@@ -84,6 +103,10 @@
         background-color: #e9ecef; /* Cor diferente para mensagens dos outros */
         margin-right: auto;
         text-align: left;
+    }
+
+    .input-group{
+        gap: 10px;
     }
 
     .chat-message strong {
