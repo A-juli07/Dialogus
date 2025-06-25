@@ -2,11 +2,11 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="text-center mb-4">Salas de Chat</h2>
+    <h2 class="text-center mb-4">Grupos de Chat</h2>
 
     <!-- Salas Públicas -->
     <div class="mb-4">
-        <h4>Salas Públicas</h4>
+        <h4>Grupos Públicos</h4>
         <div class="row">
             {% for sala in salas_publicas %}
                 <div class="col-md-4 mb-3">
@@ -25,7 +25,7 @@
 
     <!-- Minhas Salas Privadas -->
     <div>
-        <h4>Minhas Salas Privadas</h4>
+        <h4>Meus Grupos Privados</h4>
         <div class="row">
             {% for sala in minhas_salas_privadas %}
                 <div class="col-md-4 mb-3">
@@ -38,12 +38,12 @@
                     </div>
                 </div>
             {% empty %}
-                <p>Você não tem salas privadas.</p>
+                <p>Você não tem grupos privados.</p>
             {% endfor %}
         </div>
     </div>
 
-    <h4>Salas Privadas Acessadas</h4>
+    <h4>Grupos Privados Acessados</h4>
         <div class="row">
             {% for sala in salas_autorizadas %}
                 <div class="col-md-4 mb-3">
@@ -55,7 +55,7 @@
                     </div>
                 </div>
             {% empty %}
-                <p>Você não acessou nenhuma sala privada.</p>
+                <p>Você não acessou nenhum grupo privado.</p>
             {% endfor %}
         </div>
 </div>

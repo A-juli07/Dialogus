@@ -1,7 +1,7 @@
 {% extends 'chat/base.html' %}
 
 {% block content %}
-<h3>Sala Privada: {{ sala.nome }}</h3>
+<h3>Grupo Privado: {{ sala.nome }}</h3>
 <p>Digite a senha para entrar:</p>
 <form method="post">
     {% csrf_token %}

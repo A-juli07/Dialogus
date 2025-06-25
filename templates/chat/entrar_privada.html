@@ -1,12 +1,12 @@
 {% extends 'chat/base.html' %}
 
 {% block content %}
-<h2>Entrar em Sala Privada</h2>
+<h2>Entrar em Grupo Privado</h2>
 
 <form method="post">
     {% csrf_token %}
     <div class="mb-3">
-        <label for="nome">Nome da Sala</label>
+        <label for="nome">Nome do Grupo</label>
         <input type="text" name="nome" class="form-control" required>
     </div>
     <div class="mb-3">
