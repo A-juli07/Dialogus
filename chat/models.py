@@ -65,6 +65,7 @@ class MensagemDM(models.Model):
     sala_dm = models.ForeignKey(SalaPrivada, on_delete=models.CASCADE)
     conteudo = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
+    lida = models.BooleanField(default=False)
 
     def __str__(self):
         return f"[{self.timestamp:%H:%M}] {self.usuario.username}: {self.conteudo}"

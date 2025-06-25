@@ -1,5 +1,7 @@
 import os
-
+from django.urls import path  # Import necessário
+from channels.routing import ProtocolTypeRouter, URLRouter
+from chat.consumers import ChatConsumer
 # 🔁 ESSENCIAL: configurar o Django ANTES de qualquer import que use settings ou modelos
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'chatproject.settings')
 
@@ -16,7 +18,8 @@ application = ProtocolTypeRouter({
     "http": get_asgi_application(),
     "websocket": AuthMiddlewareStack(
         URLRouter(
-            chat.routing.websocket_urlpatterns
+            path("ws/chat/<str:room_name>/", ChatConsumer.as_asgi()),
+            path("ws/notifications/<int:user_id>/", NotificationConsumer.as_asgi()),
         )
     ),
 })

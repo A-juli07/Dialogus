@@ -2,39 +2,41 @@
 
 {% block content %}
 <div class="container mt-4">
-    <!-- Título Mensagens Diretas -->
     <h2 class="mb-4">Mensagens Diretas</h2>
-    
-    <!-- Lista de Mensagens Diretas -->
+
     <div class="card mb-4">
         <div class="card-body">
             <ul class="list-group">
                 {% for dm in dms %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         {% if dm.usuario1 == user %}
-                            <a href="{% url 'room' room_name=dm.get_nome_sala %}" class="text-decoration-none">{{ dm.usuario2.username }}</a>
+                            <a href="{% url 'room' room_name=dm.get_nome_sala %}" class="btn btn-primary position-relative">
+                                {{ dm.usuario2.username }}
+                                <span id="dm-unread-{{ dm.id }}" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" {% if dm.unread_count == 0 %}style="display:none"{% endif %}>
+                                    {{ dm.unread_count }}
+                                </span>
+                            </a>
                         {% else %}
-                            <a href="{% url 'room' room_name=dm.get_nome_sala %}" class="text-decoration-none">{{ dm.usuario1.username }}</a>
+                            <a href="{% url 'room' room_name=dm.get_nome_sala %}" class="btn btn-primary position-relative">
+                                {{ dm.usuario1.username }}
+                                <span id="dm-unread-{{ dm.id }}" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" {% if dm.unread_count == 0 %}style="display:none"{% endif %}>
+                                    {{ dm.unread_count }}
+                                </span>
+                            </a>
                         {% endif %}
                     </li>
-                {% empty %}
-                    <li class="list-group-item">Você ainda não tem mensagens diretas.</li>
                 {% endfor %}
             </ul>
         </div>
     </div>
 
-    <!-- Botão para Enviar Convite -->
     <div class="text-center mb-4">
         <a href="{% url 'enviar_convite' %}" class="btn btn-primary w-100">Enviar Convite por ID</a>
     </div>
 
-    <!-- Título Convites Recebidos e Enviados -->
     <h3 class="mb-3">Convites</h3>
 
-    <!-- Grid para Convites Recebidos e Enviados -->
     <div class="row">
-        <!-- Convites Recebidos -->
         <div class="col-md-6 mb-3">
             <div class="card">
                 <div class="card-body">
@@ -56,7 +58,6 @@
             </div>
         </div>
 
-        <!-- Convites Enviados -->
         <div class="col-md-6 mb-3">
             <div class="card">
                 <div class="card-body">
@@ -76,11 +77,27 @@
         </div>
     </div>
 </div>
+
+<script>
+    const userId = {{ user.id }};
+    const socket = new WebSocket(`ws://${window.location.host}/ws/notifications/${userId}/`);
+
+    socket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+
+        if (data.type === "nova_dm") {
+            const badge = document.querySelector(`#dm-unread-${data.sala_id}`);
+            if (badge) {
+                let atual = parseInt(badge.innerText || "0");
+                badge.innerText = atual + 1;
+                badge.style.display = "inline-block";
+            }
+        }
+    };
+</script>
 {% endblock %}
 
-
 <style>
-    /* Estilos para os botões */
     .btn {
         border-radius: 25px;
         padding-left: 20px;
@@ -110,9 +127,13 @@
     .list-group-item {
         border-radius: 15px;
         padding: 15px;
+        background-color: #f8f9fa;
+    }
+    
+    .list-group-item:hover {
+        background-color: #e9ecef;
     }
 
-    /* Cartões de convite */
     .card {
         border-radius: 15px;
     }
@@ -121,7 +142,6 @@
         padding: 1.5rem;
     }
 
-    /* Adicionar ícones nos botões */
     .bi {
         margin-right: 5px;
     }
@@ -130,22 +150,18 @@
         text-decoration: none;
     }
 
-    /* Estilo para as mensagens diretas */
-    .list-group-item {
-        background-color: #f8f9fa;
-    }
-    
-    .list-group-item:hover {
-        background-color: #e9ecef;
-    }
-
-    /* Ajustes de layout */
     .row {
         display: flex;
         flex-wrap: wrap;
     }
 
-    /* Para garantir que o texto dentro da lista esteja alinhado corretamente */
+    .badge {
+        font-size: 0.8rem;
+        padding: 0.3em 0.6em;
+        margin-left: 10px;
+        vertical-align: middle;
+    }
+
     .list-group-item .btn {
         margin-left: auto;
     }

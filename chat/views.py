@@ -16,6 +16,13 @@ def index(request):
     # DMs ativas (salas privadas)
     dms = SalaPrivada.objects.filter(Q(usuario1=user) | Q(usuario2=user))
 
+    for dm in dms:
+        unread_count = MensagemDM.objects.filter(
+            sala_dm=dm,
+            lida=False
+        ).exclude(usuario=user).count()
+        dm.unread_count = unread_count
+
     # Convites pendentes
     convites_recebidos = Amizade.objects.filter(destinatario=user, aceita=False)
     convites_enviados = Amizade.objects.filter(remetente=user, aceita=False)
@@ -90,6 +97,8 @@ def room(request, room_name):
             )
         except (ValueError, SalaPrivada.DoesNotExist):
             raise Http404("Sala privada de DM não encontrada.")
+
+        MensagemDM.objects.filter(sala_dm=sala_dm, lida=False).exclude(usuario=request.user).update(lida=True)
         
         # Usamos MensagemDM para mensagens privadas
         mensagens = MensagemDM.objects.filter(sala_dm=sala_dm).order_by('timestamp')[:50]
