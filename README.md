@@ -73,7 +73,7 @@ python manage.py createsuperuser
 ### 8. Rodar o Servidor Localmente
 Inicie o servidor de desenvolvimento do Django para rodar o projeto localmente:
 ```bash
-python manage.py runserver
+daphne -p 8000 chatproject.asgi:application
 ```
 O projeto estará acessível no endereço http://127.0.0.1:8000.
 

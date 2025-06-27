@@ -78,21 +78,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'from_user': event['from_user']
         }))
 
-@sync_to_async
-def salvar_mensagem(self, usuario, nome_sala, conteudo):
-    if '_' in nome_sala:
-        id1, id2 = map(int, nome_sala.split('_'))
-        sala_dm = SalaPrivada.objects.get(
-            Q(usuario1_id=id1, usuario2_id=id2) | Q(usuario1_id=id2, usuario2_id=id1)
-        )
-        mensagem = MensagemDM.objects.create(usuario=usuario, sala_dm=sala_dm, conteudo=conteudo)
+    @sync_to_async
+    def salvar_mensagem(self, usuario, nome_sala, conteudo):
+        if '_' in nome_sala:
+            id1, id2 = map(int, nome_sala.split('_'))
+            sala_dm = SalaPrivada.objects.get(
+                Q(usuario1_id=id1, usuario2_id=id2) | Q(usuario1_id=id2, usuario2_id=id1)
+            )
+            mensagem = MensagemDM.objects.create(usuario=usuario, sala_dm=sala_dm, conteudo=conteudo)
 
-        # Identificar destinatário
-        destinatario = sala_dm.usuario2 if sala_dm.usuario1 == usuario else sala_dm.usuario1
+            # Identificar destinatário
+            destinatario = sala_dm.usuario2 if sala_dm.usuario1 == usuario else sala_dm.usuario1
 
-        return destinatario.id, sala_dm.id  # retorna quem deve ser notificado e qual sala
-    else:
-        sala = Sala.objects.get(nome=nome_sala)
-        Mensagem.objects.create(usuario=usuario, sala=sala, conteudo=conteudo)
-        return None, None
+            return destinatario.id, sala_dm.id  # retorna quem deve ser notificado e qual sala
+        else:
+            sala = Sala.objects.get(nome=nome_sala)
+            Mensagem.objects.create(usuario=usuario, sala=sala, conteudo=conteudo)
+            return None, None
 
