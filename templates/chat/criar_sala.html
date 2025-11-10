@@ -1,41 +1,625 @@
 {% extends 'chat/base.html' %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <h2 class="text-center mb-4">Criar novo grupo</h2>
-            <div class="card">
-                <div class="card-body">
-                    <form method="post">
-                        {% csrf_token %}
-                        {{ form.as_p }}
-                        <button class="btn btn-success w-100 mt-3" type="submit">Criar grupo</button>
-                    </form>
-                    <p class="text-center mt-3"><a href="{% url 'salas' %}" class="btn btn-secondary">Voltar para grupos</a></p>
+<div class="form-container">
+    <div class="form-card fade-in">
+        <div class="form-header">
+            <div class="form-icon">
+                <i class="bi bi-people"></i>
+            </div>
+            <h2>Criar novo grupo</h2>
+            <p class="text-muted">Preencha as informações para criar seu grupo</p>
+        </div>
+
+        <form method="post" class="modern-form" id="createRoomForm">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="{{ form.nome.id_for_label }}" class="form-label">
+                    <i class="bi bi-chat-text"></i> Nome do Grupo
+                </label>
+                <input
+                    type="text"
+                    name="{{ form.nome.name }}"
+                    id="{{ form.nome.id_for_label }}"
+                    class="form-control form-control-modern"
+                    placeholder="Digite o nome do grupo"
+                    required
+                    maxlength="100"
+                    {% if form.nome.value %}value="{{ form.nome.value }}"{% endif %}
+                >
+                {% if form.nome.help_text %}
+                    <small class="form-text text-muted">{{ form.nome.help_text }}</small>
+                {% endif %}
+                {% if form.nome.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.nome.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.descricao.id_for_label }}" class="form-label">
+                    <i class="bi bi-card-text"></i> Descrição
+                </label>
+                <textarea
+                    name="{{ form.descricao.name }}"
+                    id="{{ form.descricao.id_for_label }}"
+                    class="form-control form-control-modern"
+                    placeholder="Descreva sobre o que é o grupo (opcional)"
+                    rows="3"
+                    maxlength="500"
+                >{% if form.descricao.value %}{{ form.descricao.value }}{% endif %}</textarea>
+                <div class="char-counter">
+                    <span id="charCount">0</span>/500 caracteres
+                </div>
+                {% if form.descricao.help_text %}
+                    <small class="form-text text-muted">{{ form.descricao.help_text }}</small>
+                {% endif %}
+                {% if form.descricao.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.descricao.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="bi bi-shield-lock"></i> Privacidade do Grupo
+                </label>
+                <div class="privacy-options">
+                    <label class="privacy-option">
+                        <input
+                            type="radio"
+                            name="{{ form.privada.name }}"
+                            value="False"
+                            {% if not form.privada.value or form.privada.value == 'False' %}checked{% endif %}
+                        >
+                        <div class="privacy-card">
+                            <i class="bi bi-globe"></i>
+                            <div>
+                                <strong>Público</strong>
+                                <small>Qualquer pessoa pode entrar</small>
+                            </div>
+                        </div>
+                    </label>
+                    <label class="privacy-option">
+                        <input
+                            type="radio"
+                            name="{{ form.privada.name }}"
+                            value="True"
+                            {% if form.privada.value == 'True' %}checked{% endif %}
+                        >
+                        <div class="privacy-card">
+                            <i class="bi bi-lock"></i>
+                            <div>
+                                <strong>Privado</strong>
+                                <small>Apenas com convite</small>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+                {% if form.privada.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.privada.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div id="passwordField" class="form-group" style="display: none;">
+                <label for="{{ form.senha.id_for_label }}" class="form-label">
+                    <i class="bi bi-key"></i> Senha do Grupo
+                </label>
+                <div class="password-input-wrapper">
+                    <input
+                        type="password"
+                        name="{{ form.senha.name }}"
+                        id="{{ form.senha.id_for_label }}"
+                        class="form-control form-control-modern"
+                        placeholder="Defina uma senha para o grupo"
+                        {% if form.senha.value %}value="{{ form.senha.value }}"{% endif %}
+                    >
+                    <button type="button" class="password-toggle" onclick="togglePassword('{{ form.senha.id_for_label }}')">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+                {% if form.senha.help_text %}
+                    <small class="form-text text-muted">{{ form.senha.help_text }}</small>
+                {% endif %}
+                {% if form.senha.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.senha.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger alert-modern">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-success btn-modern">
+                    <i class="bi bi-plus-circle"></i> Criar Grupo
+                </button>
+                <a href="{% url 'salas' %}" class="btn btn-outline-secondary btn-modern">
+                    <i class="bi bi-arrow-left"></i> Voltar
+                </a>
+            </div>
+        </form>
+
+        <div class="preview-section">
+            <h6><i class="bi bi-eye"></i> Pré-visualização</h6>
+            <div class="group-preview-card">
+                <div class="preview-header">
+                    <div class="preview-icon">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div class="preview-info">
+                        <h5 id="previewName">Nome do Grupo</h5>
+                        <p id="previewDesc">Sem descrição</p>
+                    </div>
+                </div>
+                <div class="preview-meta">
+                    <span id="previewPrivacy" class="badge-public">
+                        <i class="bi bi-globe"></i> Público
+                    </span>
+                    <span class="badge-members">
+                        <i class="bi bi-person"></i> Você
+                    </span>
                 </div>
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
-
 
 <style>
-    .card {
-        border-radius: 15px;
+.form-container {
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    padding-top: 100px;
+}
+
+.form-card {
+    background: var(--card-bg);
+    border-radius: 24px;
+    box-shadow: var(--shadow-xl);
+    padding: 3rem;
+    max-width: 900px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 3rem;
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.form-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    background: linear-gradient(135deg, #10b981, #059669);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: white;
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+}
+
+.form-header h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.form-header p {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+}
+
+.modern-form {
+    margin-bottom: 0;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    display: block;
+    font-size: 0.95rem;
+}
+
+.form-label i {
+    margin-right: 0.25rem;
+    color: #10b981;
+}
+
+.form-control-modern {
+    padding: 0.875rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    width: 100%;
+}
+
+.form-control-modern:focus {
+    outline: none;
+    border-color: #10b981;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+    background: var(--card-bg);
+}
+
+textarea.form-control-modern {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.char-counter {
+    text-align: right;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+}
+
+.privacy-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.privacy-option {
+    cursor: pointer;
+    margin: 0;
+}
+
+.privacy-option input[type="radio"] {
+    display: none;
+}
+
+.privacy-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--input-bg);
+    transition: all 0.3s ease;
+}
+
+.privacy-card i {
+    font-size: 1.5rem;
+    color: var(--text-muted);
+}
+
+.privacy-card strong {
+    display: block;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+}
+
+.privacy-card small {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+
+.privacy-option input[type="radio"]:checked + .privacy-card {
+    border-color: #10b981;
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.privacy-option input[type="radio"]:checked + .privacy-card i {
+    color: #10b981;
+}
+
+.password-input-wrapper {
+    position: relative;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.5rem;
+    transition: color 0.3s;
+}
+
+.password-toggle:hover {
+    color: #10b981;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.btn-modern {
+    padding: 0.875rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    transition: all 0.3s ease;
+    flex: 1;
+    text-decoration: none;
+    text-align: center;
+}
+
+.btn-modern i {
+    margin-right: 0.5rem;
+}
+
+.btn-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+}
+
+.btn-outline-secondary {
+    background: transparent;
+    border: 2px solid var(--border-color);
+    color: var(--text-muted);
+}
+
+.btn-outline-secondary:hover {
+    background: var(--hover-bg);
+    border-color: var(--text-muted);
+    color: var(--text-primary);
+}
+
+.alert-modern {
+    border-radius: 12px;
+    border: none;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-text {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.preview-section {
+    background: var(--hover-bg);
+    border-radius: 16px;
+    padding: 2rem;
+    border: 2px solid var(--border-color);
+}
+
+.preview-section h6 {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+}
+
+.preview-section h6 i {
+    color: #10b981;
+}
+
+.group-preview-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 2px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.preview-header {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.preview-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+.preview-info h5 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 0.5rem 0;
+}
+
+.preview-info p {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.preview-meta {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.badge-public,
+.badge-private,
+.badge-members {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.badge-public {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.badge-private {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.badge-members {
+    background: var(--hover-bg);
+    color: var(--text-muted);
+}
+
+@media (max-width: 992px) {
+    .form-card {
+        grid-template-columns: 1fr;
+        max-width: 600px;
     }
 
-    .card-body {
-        padding: 2rem;
+    .preview-section {
+        order: -1;
+    }
+}
+
+@media (max-width: 576px) {
+    .form-card {
+        padding: 2rem 1.5rem;
     }
 
-    .btn-success {
-        border-radius: 25px;
-        padding: 10px;
+    .form-icon {
+        width: 64px;
+        height: 64px;
+        font-size: 2rem;
     }
 
-    .text-center a {
-        color: #007bff;
+    .form-header h2 {
+        font-size: 1.5rem;
     }
+
+    .privacy-options {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+}
 </style>
+
+<script>
+// Character counter
+const textarea = document.getElementById('{{ form.descricao.id_for_label }}');
+const charCount = document.getElementById('charCount');
+
+if (textarea && charCount) {
+    // Initialize counter
+    charCount.textContent = textarea.value.length;
+
+    textarea.addEventListener('input', function() {
+        charCount.textContent = this.value.length;
+    });
+}
+
+// Show/hide password field based on privacy selection
+const radioButtons = document.querySelectorAll('input[name="{{ form.privada.name }}"]');
+const passwordField = document.getElementById('passwordField');
+
+radioButtons.forEach(radio => {
+    radio.addEventListener('change', function() {
+        if (this.value === 'True') {
+            passwordField.style.display = 'block';
+        } else {
+            passwordField.style.display = 'none';
+        }
+    });
+});
+
+// Initialize on load
+if (document.querySelector('input[name="{{ form.privada.name }}"]:checked')?.value === 'True') {
+    passwordField.style.display = 'block';
+}
+
+function togglePassword(fieldId) {
+    const field = document.getElementById(fieldId);
+    const button = field.parentElement.querySelector('.password-toggle');
+    const icon = button.querySelector('i');
+
+    if (field.type === 'password') {
+        field.type = 'text';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+    } else {
+        field.type = 'password';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+    }
+}
+
+// Preview update functionality
+const nomeInput = document.getElementById('{{ form.nome.id_for_label }}');
+const descricaoInput = document.getElementById('{{ form.descricao.id_for_label }}');
+const previewName = document.getElementById('previewName');
+const previewDesc = document.getElementById('previewDesc');
+const previewPrivacy = document.getElementById('previewPrivacy');
+
+// Update preview nome
+if (nomeInput) {
+    nomeInput.addEventListener('input', function() {
+        const value = this.value.trim();
+        previewName.textContent = value || 'Nome do Grupo';
+    });
+}
+
+// Update preview descrição
+if (descricaoInput) {
+    descricaoInput.addEventListener('input', function() {
+        const value = this.value.trim();
+        previewDesc.textContent = value || 'Sem descrição';
+    });
+}
+
+// Update preview privacidade
+radioButtons.forEach(radio => {
+    radio.addEventListener('change', function() {
+        if (this.value === 'True') {
+            previewPrivacy.innerHTML = '<i class="bi bi-lock"></i> Privado';
+            previewPrivacy.className = 'badge-private';
+        } else {
+            previewPrivacy.innerHTML = '<i class="bi bi-globe"></i> Público';
+            previewPrivacy.className = 'badge-public';
+        }
+    });
+});
+</script>
+{% endblock %}

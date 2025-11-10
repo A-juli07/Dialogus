@@ -1,40 +1,345 @@
 {% extends 'chat/base.html' %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <h2 class="text-center mb-4">Criar Conta</h2>
-            <div class="card">
-                <div class="card-body">
-                    <form method="post">
-                        {% csrf_token %}
-                        {{ form.as_p }}
-                        <button class="btn btn-success w-100 mt-3" type="submit">Cadastrar</button>
-                    </form>
-                    <p class="text-center mt-3">Já tem uma conta? <a href="{% url 'login' %}">Entre aqui</a></p>
-                </div>
+<div class="auth-container">
+    <div class="auth-card fade-in">
+        <div class="auth-header">
+            <div class="auth-icon">
+                <i class="bi bi-person-plus"></i>
             </div>
+            <h2>Criar sua conta</h2>
+            <p class="text-muted">Preencha os dados para começar</p>
+        </div>
+
+        <form method="post" class="auth-form" id="registerForm">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}" class="form-label">
+                    <i class="bi bi-person"></i> Nome de Usuário
+                </label>
+                <input
+                    type="text"
+                    name="{{ form.username.name }}"
+                    id="{{ form.username.id_for_label }}"
+                    class="form-control form-control-modern"
+                    placeholder="Escolha um nome de usuário"
+                    required
+                    autocomplete="username"
+                    {% if form.username.value %}value="{{ form.username.value }}"{% endif %}
+                >
+                {% if form.username.help_text %}
+                    <small class="form-text text-muted">{{ form.username.help_text }}</small>
+                {% endif %}
+                {% if form.username.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.username.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if form.email %}
+            <div class="form-group">
+                <label for="{{ form.email.id_for_label }}" class="form-label">
+                    <i class="bi bi-envelope"></i> Email
+                </label>
+                <input
+                    type="email"
+                    name="{{ form.email.name }}"
+                    id="{{ form.email.id_for_label }}"
+                    class="form-control form-control-modern"
+                    placeholder="seu@email.com"
+                    autocomplete="email"
+                    {% if form.email.value %}value="{{ form.email.value }}"{% endif %}
+                >
+                {% if form.email.help_text %}
+                    <small class="form-text text-muted">{{ form.email.help_text }}</small>
+                {% endif %}
+                {% if form.email.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.email.errors }}
+                    </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <div class="form-group">
+                <label for="{{ form.password1.id_for_label }}" class="form-label">
+                    <i class="bi bi-lock"></i> Senha
+                </label>
+                <div class="password-input-wrapper">
+                    <input
+                        type="password"
+                        name="{{ form.password1.name }}"
+                        id="{{ form.password1.id_for_label }}"
+                        class="form-control form-control-modern"
+                        placeholder="Crie uma senha forte"
+                        required
+                        autocomplete="new-password"
+                    >
+                    <button type="button" class="password-toggle" onclick="togglePassword('{{ form.password1.id_for_label }}')">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+                {% if form.password1.help_text %}
+                    <small class="form-text text-muted">{{ form.password1.help_text }}</small>
+                {% endif %}
+                {% if form.password1.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.password1.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.password2.id_for_label }}" class="form-label">
+                    <i class="bi bi-lock-fill"></i> Confirmar Senha
+                </label>
+                <div class="password-input-wrapper">
+                    <input
+                        type="password"
+                        name="{{ form.password2.name }}"
+                        id="{{ form.password2.id_for_label }}"
+                        class="form-control form-control-modern"
+                        placeholder="Digite a senha novamente"
+                        required
+                        autocomplete="new-password"
+                    >
+                    <button type="button" class="password-toggle" onclick="togglePassword('{{ form.password2.id_for_label }}')">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+                {% if form.password2.help_text %}
+                    <small class="form-text text-muted">{{ form.password2.help_text }}</small>
+                {% endif %}
+                {% if form.password2.errors %}
+                    <div class="invalid-feedback d-block">
+                        {{ form.password2.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger alert-modern">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <button type="submit" class="btn btn-success btn-modern w-100">
+                <i class="bi bi-person-plus"></i> Criar Conta
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            <p>Já tem uma conta? <a href="{% url 'login' %}" class="auth-link">Entre aqui</a></p>
         </div>
     </div>
 </div>
-{% endblock %}
 
 <style>
-    .card {
-        border-radius: 15px;
+.auth-container {
+    min-height: calc(100vh - 120px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+}
+
+.auth-card {
+    background: var(--card-bg);
+    border-radius: 24px;
+    box-shadow: var(--shadow-xl);
+    padding: 3rem;
+    max-width: 480px;
+    width: 100%;
+    backdrop-filter: blur(10px);
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.auth-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    background: linear-gradient(135deg, #10b981, #3b82f6);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: white;
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+}
+
+.auth-header h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.auth-header p {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+}
+
+.auth-form {
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    display: block;
+    font-size: 0.95rem;
+}
+
+.form-label i {
+    margin-right: 0.25rem;
+    color: #10b981;
+}
+
+.form-control-modern {
+    padding: 0.875rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    width: 100%;
+}
+
+.form-control-modern:focus {
+    outline: none;
+    border-color: #10b981;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+    background: var(--card-bg);
+}
+
+.password-input-wrapper {
+    position: relative;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.5rem;
+    transition: color 0.3s;
+}
+
+.password-toggle:hover {
+    color: #10b981;
+}
+
+.btn-modern {
+    padding: 0.875rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+}
+
+.btn-modern i {
+    margin-right: 0.5rem;
+}
+
+.btn-modern:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+}
+
+.auth-footer {
+    text-align: center;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.auth-footer p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.auth-link {
+    color: #10b981;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s;
+}
+
+.auth-link:hover {
+    color: #3b82f6;
+    text-decoration: underline;
+}
+
+.alert-modern {
+    border-radius: 12px;
+    border: none;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-text {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+@media (max-width: 576px) {
+    .auth-card {
+        padding: 2rem 1.5rem;
     }
 
-    .card-body {
-        padding: 2rem;
+    .auth-icon {
+        width: 64px;
+        height: 64px;
+        font-size: 2rem;
     }
 
-    .btn-success {
-        border-radius: 25px;
-        padding: 10px;
+    .auth-header h2 {
+        font-size: 1.5rem;
     }
-
-    .text-center a {
-        color: #007bff;
-    }
+}
 </style>
+
+<script>
+function togglePassword(fieldId) {
+    const field = document.getElementById(fieldId);
+    const button = field.parentElement.querySelector('.password-toggle');
+    const icon = button.querySelector('i');
+
+    if (field.type === 'password') {
+        field.type = 'text';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+    } else {
+        field.type = 'password';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+    }
+}
+</script>
+{% endblock %}
