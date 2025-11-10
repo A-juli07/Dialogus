@@ -1,58 +1,352 @@
 {% extends 'chat/base.html' %}
 
+{% block title %}Meu Perfil - Dialogus{% endblock %}
+
 {% block content %}
-<div class="container mt-5">
-    <h2 class="text-center mb-4">Meu Perfil</h2>
-    
-    <div class="card">
-        <div class="card-body">
-            <form method="post" enctype="multipart/form-data">
+<div class="container fade-in" style="max-width: 900px;">
+    <!-- Header do Perfil -->
+    <div class="profile-header mb-4">
+        <div class="text-center">
+            {% if perfil.foto_perfil %}
+                <img src="{{ perfil.foto_perfil.url }}" class="profile-avatar" alt="Foto de Perfil">
+            {% else %}
+                <div class="profile-avatar mx-auto d-flex align-items-center justify-content-center" style="background: var(--gradient-primary); font-size: 3rem;">
+                    {{ user.username|slice:":1"|upper }}
+                </div>
+            {% endif %}
+            <h2 class="profile-name">{{ user.username }}</h2>
+            {% if perfil.status %}
+                <p class="profile-status">
+                    <i class="bi bi-chat-quote"></i> {{ perfil.status }}
+                </p>
+            {% else %}
+                <p class="profile-status opacity-75">
+                    <i class="bi bi-info-circle"></i> Adicione um status
+                </p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Informações do Usuário -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+            <div class="card-modern h-100">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-person-badge" style="font-size: 2.5rem; color: var(--accent-primary);"></i>
+                    <h6 class="mt-3 mb-1 text-muted">ID do Usuário</h6>
+                    <h4 class="mb-0">#{{ user.id }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card-modern h-100">
+                <div class="card-body text-center p-4">
+                    <i class="bi bi-calendar-check" style="font-size: 2.5rem; color: var(--accent-success);"></i>
+                    <h6 class="mt-3 mb-1 text-muted">Membro desde</h6>
+                    <h4 class="mb-0">{{ user.date_joined|date:"d/m/Y" }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulário de Edição -->
+    <div class="card-modern">
+        <div class="card-header" style="background: var(--gradient-primary); color: white;">
+            <h5 class="mb-0">
+                <i class="bi bi-pencil-square me-2"></i>
+                Editar Perfil
+            </h5>
+        </div>
+        <div class="card-body p-4">
+            <form method="post" enctype="multipart/form-data" id="profileForm">
                 {% csrf_token %}
-                <div class="row mb-3">
-                    <div class="col-md-4 text-center">
-                        {% if perfil.foto_perfil %}
-                            <img src="{{ perfil.foto_perfil.url }}" class="img-fluid rounded-circle" alt="Foto de Perfil" style="max-width: 150px;">
-                        {% endif %}
-                        <br>
-                        <label for="id_foto_perfil" class="mt-2">Alterar Foto de Perfil</label>
-                        <input type="file" class="form-control" name="foto_perfil" id="id_foto_perfil">
+
+                <!-- Upload de Foto -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold">
+                        <i class="bi bi-camera-fill me-2"></i>
+                        Foto de Perfil
+                    </label>
+                    <div class="text-center mb-3">
+                        <div class="profile-photo-preview" id="photoPreview">
+                            {% if perfil.foto_perfil %}
+                                <img src="{{ perfil.foto_perfil.url }}" alt="Preview" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid var(--accent-primary);">
+                            {% else %}
+                                <div style="width: 150px; height: 150px; border-radius: 50%; background: var(--gradient-primary); color: white; display: inline-flex; align-items: center; justify-content: center; font-size: 4rem; font-weight: bold;">
+                                    {{ user.username|slice:":1"|upper }}
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
-                    <div class="col-md-8">
-                        <div class="mb-3">
-                            <label for="id_status" class="form-label">Status</label>
-                            <input type="text" class="form-control" name="status" id="id_status" value="{{ perfil.status }}">
-                        </div>
-                        <div class="mb-3">
-                            <label for="id_biografia" class="form-label">Biografia</label>
-                            <textarea class="form-control" name="biografia" id="id_biografia" rows="3">{{ perfil.biografia }}</textarea>
-                        </div>
+                    <div class="input-group">
+                        <input type="file" class="form-control" name="foto_perfil" id="id_foto_perfil" accept="image/*" onchange="previewImage(this)">
+                        <label class="input-group-text" for="id_foto_perfil">
+                            <i class="bi bi-upload"></i>
+                        </label>
+                    </div>
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Formatos aceitos: JPG, PNG, GIF (max 5MB)
+                    </small>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- Status -->
+                <div class="mb-4">
+                    <label for="id_status" class="form-label fw-bold">
+                        <i class="bi bi-chat-quote-fill me-2"></i>
+                        Status
+                    </label>
+                    <input
+                        type="text"
+                        class="form-control form-control-lg"
+                        name="status"
+                        id="id_status"
+                        value="{{ perfil.status }}"
+                        placeholder="Ex: Disponível para chat!"
+                        maxlength="100"
+                    >
+                    <div class="form-text">
+                        <span id="statusCount">{{ perfil.status|length|default:"0" }}</span>/100 caracteres
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary w-100">Salvar Alterações</button>
+
+                <!-- Biografia -->
+                <div class="mb-4">
+                    <label for="id_biografia" class="form-label fw-bold">
+                        <i class="bi bi-file-text-fill me-2"></i>
+                        Biografia
+                    </label>
+                    <textarea
+                        class="form-control"
+                        name="biografia"
+                        id="id_biografia"
+                        rows="4"
+                        placeholder="Conte um pouco sobre você..."
+                        maxlength="500"
+                    >{{ perfil.biografia }}</textarea>
+                    <div class="form-text">
+                        <span id="bioCount">{{ perfil.biografia|length|default:"0" }}</span>/500 caracteres
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- Botões de Ação -->
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-gradient-primary btn-lg btn-modern">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        Salvar Alterações
+                    </button>
+                    <a href="{% url 'index' %}" class="btn btn-outline-secondary btn-modern">
+                        <i class="bi bi-x-circle me-2"></i>
+                        Cancelar
+                    </a>
+                </div>
             </form>
         </div>
     </div>
+
+    <!-- Dicas -->
+    <div class="row mt-4 mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card-modern text-center p-3">
+                <i class="bi bi-shield-check" style="font-size: 2rem; color: var(--accent-success);"></i>
+                <h6 class="mt-2 mb-1">Privacidade</h6>
+                <small class="text-muted">Suas informações são privadas</small>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card-modern text-center p-3">
+                <i class="bi bi-lightning-charge" style="font-size: 2rem; color: var(--accent-warning);"></i>
+                <h6 class="mt-2 mb-1">Rápido</h6>
+                <small class="text-muted">Atualizações instantâneas</small>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card-modern text-center p-3">
+                <i class="bi bi-star-fill" style="font-size: 2rem; color: var(--accent-info);"></i>
+                <h6 class="mt-2 mb-1">Personalize</h6>
+                <small class="text-muted">Deixe seu perfil único</small>
+            </div>
+        </div>
+    </div>
 </div>
-{% endblock %}
 
 <style>
-    .img-fluid {
-        border-radius: 50%;
+    /* Preview de foto */
+    .profile-photo-preview {
+        margin: 0 auto;
+        position: relative;
+        display: inline-block;
     }
 
-    .card {
-        border-radius: 15px;
+    .profile-photo-preview img {
+        box-shadow: var(--shadow-lg);
+        transition: transform 0.3s ease;
     }
 
-    .form-control {
-        border-radius: 10px;
+    .profile-photo-preview img:hover {
+        transform: scale(1.05);
     }
 
-    .btn {
-        border-radius: 25px;
+    /* Form controls modernos */
+    .form-control,
+    .form-select {
+        border: 2px solid var(--bg-tertiary);
+        border-radius: var(--border-radius-md);
+        padding: 0.75rem 1rem;
+        transition: all var(--transition-fast);
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: var(--accent-primary);
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
     }
 
     .form-label {
-        font-weight: bold;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    /* Input group */
+    .input-group-text {
+        background: var(--gradient-primary);
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+
+    /* Contador de caracteres */
+    .form-text {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.5rem;
+    }
+
+    /* Profile header responsivo */
+    @media (max-width: 768px) {
+        .profile-header {
+            padding: 2rem 1rem;
+        }
+
+        .profile-avatar {
+            width: 100px !important;
+            height: 100px !important;
+        }
+
+        .profile-name {
+            font-size: 1.5rem;
+        }
     }
 </style>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Preview de imagem antes do upload
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const preview = document.getElementById('photoPreview');
+                preview.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview"
+                         style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid var(--accent-primary);">
+                `;
+
+                // Animação de entrada
+                preview.querySelector('img').style.opacity = '0';
+                setTimeout(() => {
+                    preview.querySelector('img').style.transition = 'opacity 0.3s ease';
+                    preview.querySelector('img').style.opacity = '1';
+                }, 10);
+            };
+
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // Contador de caracteres para Status
+    const statusInput = document.getElementById('id_status');
+    const statusCount = document.getElementById('statusCount');
+
+    if (statusInput && statusCount) {
+        statusInput.addEventListener('input', function() {
+            statusCount.textContent = this.value.length;
+        });
+    }
+
+    // Contador de caracteres para Biografia
+    const bioInput = document.getElementById('id_biografia');
+    const bioCount = document.getElementById('bioCount');
+
+    if (bioInput && bioCount) {
+        bioInput.addEventListener('input', function() {
+            bioCount.textContent = this.value.length;
+        });
+    }
+
+    // Validação do formulário
+    const form = document.getElementById('profileForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const fileInput = document.getElementById('id_foto_perfil');
+
+            // Validar tamanho do arquivo (5MB)
+            if (fileInput.files.length > 0) {
+                const fileSize = fileInput.files[0].size / 1024 / 1024; // em MB
+
+                if (fileSize > 5) {
+                    e.preventDefault();
+
+                    if (typeof Dialogus !== 'undefined') {
+                        Dialogus.NotificationManager.show(
+                            'A imagem deve ter no máximo 5MB',
+                            'error',
+                            4000
+                        );
+                    } else {
+                        alert('A imagem deve ter no máximo 5MB');
+                    }
+                    return false;
+                }
+            }
+
+            // Mostrar loader ao submeter
+            if (typeof Dialogus !== 'undefined') {
+                Dialogus.LoaderManager.show('Salvando perfil...');
+            }
+        });
+    }
+
+    // Prevenir perda de dados não salvos
+    let formChanged = false;
+
+    if (form) {
+        const inputs = form.querySelectorAll('input, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('change', () => {
+                formChanged = true;
+            });
+        });
+
+        window.addEventListener('beforeunload', (e) => {
+            if (formChanged) {
+                e.preventDefault();
+                e.returnValue = '';
+                return '';
+            }
+        });
+
+        form.addEventListener('submit', () => {
+            formChanged = false;
+        });
+    }
+</script>
+{% endblock %}

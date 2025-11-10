@@ -1,157 +1,391 @@
 {% extends 'chat/base.html' %}
 
-{% block content %}
-<div class="container mt-4">
-    <!-- Título da sala -->
-    <h2 class="mb-3">
-        {% if '_' in room_name %}
-            <span class="badge bg-primary">Sala Privada (DM)</span>
-        {% else %}
-            <span class="badge bg-secondary">Sala: {{ room_name }}</span>
-        {% endif %}
-        <!-- Contador de novas mensagens não lidas -->
-    </h2>
+{% block title %}{{ room_name }} - Dialogus{% endblock %}
 
-    <!-- Exibição das mensagens -->
-    <div id="chat-log" class="border rounded p-3 mb-3" style="height: 300px; overflow-y: scroll;">
+{% block content %}
+<div class="chat-container fade-in">
+    <!-- Cabeçalho do Chat -->
+    <div class="chat-header">
+        <div class="d-flex align-items-center gap-3">
+            <a href="{% url 'index' %}" class="btn btn-light btn-sm rounded-circle" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <div class="contact-avatar" style="width: 45px; height: 45px;">
+                {% if '_' in room_name %}
+                    <i class="bi bi-person-fill"></i>
+                {% else %}
+                    <i class="bi bi-people-fill"></i>
+                {% endif %}
+            </div>
+            <div class="flex-grow-1">
+                <h2 class="mb-0" style="font-size: 1.25rem;">
+                    {% if '_' in room_name %}
+                        DM Privada
+                    {% else %}
+                        {{ room_name }}
+                    {% endif %}
+                </h2>
+                <small style="opacity: 0.8;">
+                    {% if '_' in room_name %}
+                        <i class="bi bi-shield-lock-fill"></i> Mensagens criptografadas
+                    {% else %}
+                        <i class="bi bi-people"></i> Sala de grupo
+                    {% endif %}
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Log de Mensagens -->
+    <div id="chat-log" class="chat-log">
         {% for msg in mensagens %}
-            <div class="chat-message {% if msg.usuario == user %}my-message{% else %}other-message{% endif %}">
-                <strong>{{ msg.usuario.username }}:</strong>
-                <span>{{ msg.conteudo }}</span>
+            <div class="chat-message {% if msg.usuario == user %}my-message{% else %}other-message{% endif %}" data-message-id="{{ msg.id }}">
+                <div class="chat-message-content">
+                    {% if msg.usuario != user %}
+                        <div class="chat-message-username">{{ msg.usuario.username }}</div>
+                    {% endif %}
+                    <div class="chat-message-text">{{ msg.conteudo }}</div>
+                    <div class="chat-message-time">
+                        <small>{{ msg.timestamp|date:"H:i" }}</small>
+                        {% if msg.usuario == user %}
+                            <i class="bi bi-check2-all ms-1"></i>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="text-center text-muted py-5">
+                <i class="bi bi-chat-dots" style="font-size: 3rem; opacity: 0.3;"></i>
+                <p class="mt-3">Nenhuma mensagem ainda. Seja o primeiro a enviar!</p>
             </div>
         {% endfor %}
     </div>
 
-    <!-- Formulário de envio de mensagem -->
-    <div class="input-group mb-3">
-        <input id="chat-message-input" type="text" class="form-control" placeholder="Digite sua mensagem...">
-        <button id="chat-message-submit" class="btn btn-primary">Enviar</button>
+    <!-- Container de Input -->
+    <div class="chat-input-container">
+        <div class="chat-input-group">
+            <!-- Botão de Emoji (futuro) -->
+            <button class="btn btn-light rounded-circle" type="button" style="width: 45px; height: 45px;" title="Emojis" disabled>
+                <i class="bi bi-emoji-smile"></i>
+            </button>
+
+            <!-- Input de Mensagem -->
+            <input
+                id="chat-message-input"
+                type="text"
+                class="chat-input"
+                placeholder="Digite sua mensagem..."
+                autocomplete="off"
+                maxlength="5000"
+            >
+
+            <!-- Botão Enviar -->
+            <button id="chat-message-submit" class="chat-send-btn" type="button">
+                <i class="bi bi-send-fill"></i>
+                <span class="d-none d-sm-inline ms-2">Enviar</span>
+            </button>
+        </div>
+
+        <!-- Indicador de digitação (futuro) -->
+        <div id="typing-indicator" class="typing-indicator" style="display: none;">
+            <small class="text-muted">
+                <span class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </span>
+                Alguém está digitando...
+            </small>
+        </div>
     </div>
 </div>
 
-<script>
-    const roomName = "{{ room_name }}";
-    const userLogged = "{{ user.username }}";
-    const chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + roomName + '/');
+<style>
+    /* Indicador de digitação */
+    .typing-indicator {
+        padding: 0.5rem 0;
+        margin-top: 0.5rem;
+    }
 
-    // Recebe mensagens do WebSocket
-    chatSocket.onmessage = function(e) {
-        const data = JSON.parse(e.data);
-        const messageClass = data.username === userLogged ? 'my-message' : 'other-message';
+    .typing-dots {
+        display: inline-flex;
+        gap: 4px;
+        margin-right: 8px;
+    }
 
-        const newMessage = `
-            <div class="chat-message ${messageClass}">
-                <strong>${data.username}:</strong>
-                <span>${data.message}</span>
-            </div>
-        `;
+    .typing-dots span {
+        width: 6px;
+        height: 6px;
+        background-color: var(--text-secondary);
+        border-radius: 50%;
+        display: inline-block;
+        animation: typing 1.4s infinite;
+    }
 
-        const chatLog = document.querySelector('#chat-log');
-        chatLog.innerHTML += newMessage;
-        chatLog.scrollTop = chatLog.scrollHeight;
-    };
+    .typing-dots span:nth-child(2) {
+        animation-delay: 0.2s;
+    }
 
-    // Conexão fechada ou erro
-    chatSocket.onclose = function(e) {
-        console.error('Chat socket fechado inesperadamente.');
-    };
+    .typing-dots span:nth-child(3) {
+        animation-delay: 0.4s;
+    }
 
-    // Função de envio
-    function sendMessage() {
-        const messageInputDom = document.querySelector('#chat-message-input');
-        const message = messageInputDom.value.trim();
-        if (message.length > 0) {
-            chatSocket.send(JSON.stringify({ 'message': message }));
-            messageInputDom.value = '';
+    @keyframes typing {
+        0%, 60%, 100% {
+            transform: translateY(0);
+            opacity: 0.7;
+        }
+        30% {
+            transform: translateY(-10px);
+            opacity: 1;
         }
     }
 
-    // Clique no botão
-    document.querySelector('#chat-message-submit').onclick = function(e) {
-        sendMessage();
-    };
+    /* Ajustes para mensagens vazias */
+    .chat-log:empty::after {
+        content: 'Carregando mensagens...';
+        display: block;
+        text-align: center;
+        color: var(--text-secondary);
+        padding: 2rem;
+    }
 
-    // Pressionar Enter
-    document.querySelector('#chat-message-input').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
+    /* Animação para novas mensagens */
+    @keyframes newMessage {
+        from {
+            opacity: 0;
+            transform: scale(0.8) translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    .chat-message.new-message {
+        animation: newMessage 0.3s ease;
+    }
+
+    /* Status de leitura */
+    .chat-message-time i.bi-check2-all {
+        color: #34b7f1;
+    }
+
+    /* Scrollbar customizada */
+    .chat-log::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .chat-log::-webkit-scrollbar-track {
+        background: var(--bg-secondary);
+    }
+
+    .chat-log::-webkit-scrollbar-thumb {
+        background: var(--accent-primary);
+        border-radius: 3px;
+    }
+
+    .chat-log::-webkit-scrollbar-thumb:hover {
+        background: var(--accent-secondary);
+    }
+
+    /* Responsividade */
+    @media (max-width: 768px) {
+        .chat-container {
+            padding: 0;
+        }
+
+        .chat-header {
+            border-radius: 0;
+        }
+
+        .chat-input-container {
+            border-radius: 0;
+        }
+
+        .chat-log {
+            height: calc(100vh - 250px);
+        }
+    }
+</style>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Configuração
+    const roomName = "{{ room_name }}";
+    const userLogged = "{{ user.username }}";
+    const chatLog = document.querySelector('#chat-log');
+    const messageInput = document.querySelector('#chat-message-input');
+    const sendButton = document.querySelector('#chat-message-submit');
+
+    // WebSocket com gerenciamento melhorado
+    let chatSocket;
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 5;
+
+    function connectWebSocket() {
+        chatSocket = new WebSocket('ws://' + window.location.host + '/ws/chat/' + roomName + '/');
+
+        chatSocket.onopen = function() {
+            console.log('✅ Conectado ao WebSocket');
+            reconnectAttempts = 0;
+
+            // Notificação visual
+            if (typeof Dialogus !== 'undefined') {
+                Dialogus.NotificationManager.show('Conectado ao chat', 'success', 2000);
+            }
+        };
+
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            addMessage(data.username, data.message, data.username === userLogged);
+
+            // Som de notificação (opcional)
+            if (data.username !== userLogged) {
+                playNotificationSound();
+            }
+        };
+
+        chatSocket.onerror = function(error) {
+            console.error('❌ Erro no WebSocket:', error);
+        };
+
+        chatSocket.onclose = function(e) {
+            console.log('🔌 WebSocket fechado. Tentando reconectar...');
+
+            // Tentar reconectar
+            if (reconnectAttempts < maxReconnectAttempts) {
+                reconnectAttempts++;
+                setTimeout(connectWebSocket, 2000 * reconnectAttempts);
+            } else {
+                if (typeof Dialogus !== 'undefined') {
+                    Dialogus.NotificationManager.show('Erro de conexão. Recarregue a página.', 'error');
+                }
+            }
+        };
+    }
+
+    // Conectar ao WebSocket
+    connectWebSocket();
+
+    // Função para adicionar mensagem ao chat
+    function addMessage(username, message, isOwn) {
+        const messageClass = isOwn ? 'my-message' : 'other-message';
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+        const messageElement = document.createElement('div');
+        messageElement.className = `chat-message ${messageClass} new-message`;
+
+        let messageHTML = '<div class="chat-message-content">';
+
+        // Adicionar nome do usuário se não for própria mensagem
+        if (!isOwn) {
+            messageHTML += `<div class="chat-message-username">${escapeHtml(username)}</div>`;
+        }
+
+        messageHTML += `
+            <div class="chat-message-text">${escapeHtml(message)}</div>
+            <div class="chat-message-time">
+                <small>${timeString}</small>
+                ${isOwn ? '<i class="bi bi-check2-all ms-1"></i>' : ''}
+            </div>
+        </div>`;
+
+        messageElement.innerHTML = messageHTML;
+        chatLog.appendChild(messageElement);
+
+        // Scroll suave para o final
+        if (typeof Dialogus !== 'undefined') {
+            Dialogus.ChatUtils.scrollToBottom(chatLog);
+        } else {
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+
+        // Remover classe de animação após completar
+        setTimeout(() => {
+            messageElement.classList.remove('new-message');
+        }, 300);
+    }
+
+    // Função para enviar mensagem
+    function sendMessage() {
+        const message = messageInput.value.trim();
+
+        if (message.length === 0) {
+            return;
+        }
+
+        if (message.length > 5000) {
+            if (typeof Dialogus !== 'undefined') {
+                Dialogus.NotificationManager.show('Mensagem muito longa (máx 5000 caracteres)', 'warning');
+            }
+            return;
+        }
+
+        // Enviar via WebSocket
+        if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+            chatSocket.send(JSON.stringify({ 'message': message }));
+            messageInput.value = '';
+            messageInput.focus();
+        } else {
+            if (typeof Dialogus !== 'undefined') {
+                Dialogus.NotificationManager.show('Erro ao enviar mensagem. Reconectando...', 'error');
+            }
+        }
+    }
+
+    // Event listeners
+    sendButton.addEventListener('click', sendMessage);
+
+    messageInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             sendMessage();
         }
     });
+
+    // Auto-resize do input (opcional)
+    messageInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+
+    // Função para escapar HTML (prevenir XSS)
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Som de notificação (opcional - descomente se quiser)
+    function playNotificationSound() {
+        // const audio = new Audio('/static/sounds/notification.mp3');
+        // audio.volume = 0.3;
+        // audio.play().catch(e => console.log('Não foi possível reproduzir som'));
+    }
+
+    // Scroll inicial para o final
+    window.addEventListener('load', function() {
+        if (typeof Dialogus !== 'undefined') {
+            Dialogus.ChatUtils.scrollToBottom(chatLog, false);
+        } else {
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+    });
+
+    // Focar no input ao carregar
+    document.addEventListener('DOMContentLoaded', function() {
+        messageInput.focus();
+    });
+
+    // Limpeza ao sair da página
+    window.addEventListener('beforeunload', function() {
+        if (chatSocket) {
+            chatSocket.close();
+        }
+    });
 </script>
-
-
-<style>
-    .chat-message {
-        margin-bottom: 10px;
-        padding: 5px;
-        border-radius: 5px;
-        background-color: #f8f9fa;
-        max-width: 70%;  /* Limita o tamanho das mensagens */
-        word-wrap: break-word;
-    }
-
-    /* Mensagens do usuário logado (lado direito) */
-    .my-message {
-        background-color: #d1e7dd; /* Cor diferente para as mensagens do usuário */
-        margin-left: auto;
-        text-align: right;
-    }
-
-    /* Mensagens dos outros usuários (lado esquerdo) */
-    .other-message {
-        background-color: #e9ecef; /* Cor diferente para mensagens dos outros */
-        margin-right: auto;
-        text-align: left;
-    }
-
-    .input-group{
-        gap: 10px;
-    }
-
-    .chat-message strong {
-        color: #007bff;
-    }
-
-    /* Sala privada (DM) */
-    .badge.bg-primary {
-        background-color: #007bff !important;
-    }
-
-    /* Sala de grupo */
-    .badge.bg-secondary {
-        background-color: #6c757d !important;
-    }
-
-    /* Estilos de entrada de mensagem */
-    #chat-message-input {
-        border-radius: 25px;
-    }
-
-    #chat-message-submit {
-        border-radius: 25px;
-        padding-left: 20px;
-        padding-right: 20px;
-    }
-
-    /* Responsividade para telas pequenas */
-    @media (max-width: 768px) {
-        .chat-message {
-            font-size: 14px;
-        }
-        #chat-log {
-            height: 200px;
-        }
-        #chat-message-input {
-            width: 75%;
-        }
-    }
-
-    /* Responsividade para telas maiores */
-    @media (min-width: 769px) {
-        #chat-log {
-            height: 300px;
-        }
-    }
-</style>
 {% endblock %}
