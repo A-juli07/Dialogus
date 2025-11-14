@@ -74,7 +74,6 @@
     align-items: center;
     justify-content: center;
     padding: 2rem 1rem;
-    background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
 }
 
 .form-card {
@@ -481,41 +480,62 @@ const selectedUserDiv = document.getElementById('selectedUser');
 let searchTimeout;
 let selectedUser = null;
 
-// Mock user search function - em produção, isso seria uma chamada AJAX
+// Função de busca real de usuários via AJAX
 function searchUsers(query) {
-    // Simulação - em produção, faça uma requisição ao backend
-    // fetch(`/api/users/search/?q=${query}`)
-
     searchResults.innerHTML = '<div class="search-loading"><i class="bi bi-hourglass-split"></i> Buscando...</div>';
     searchResults.classList.add('active');
 
-    // Simula delay de rede
-    setTimeout(() => {
-        if (query.length < 2) {
-            searchResults.innerHTML = '<div class="search-no-results">Digite pelo menos 2 caracteres</div>';
-            return;
-        }
+    if (query.length < 2) {
+        searchResults.innerHTML = '<div class="search-no-results">Digite pelo menos 2 caracteres</div>';
+        return;
+    }
 
-        // Mostra mensagem informativa
-        searchResults.innerHTML = `
-            <div class="search-no-results">
-                <i class="bi bi-info-circle"></i>
-                <p>Para buscar usuários, você pode:</p>
-                <ul style="text-align: left; margin: 1rem 0; padding-left: 2rem;">
-                    <li>Ver a lista de usuários na página inicial</li>
-                    <li>Digitar o ID do usuário diretamente</li>
-                    <li>Contatar o administrador para adicionar busca</li>
-                </ul>
-                <small style="display: block; margin-top: 1rem;">
-                    <strong>Alternativa:</strong> Digite o ID diretamente<br>
-                    <input type="number"
-                           placeholder="Ex: 123"
-                           style="margin-top: 0.5rem; padding: 0.5rem; border-radius: 8px; border: 2px solid var(--border-color); width: 150px;"
-                           onchange="selectUserById(this.value)">
-                </small>
-            </div>
-        `;
-    }, 500);
+    // Faz a requisição ao backend
+    fetch(`/chat/api/buscar-usuarios/?q=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.usuarios.length === 0) {
+                searchResults.innerHTML = `
+                    <div class="search-no-results">
+                        <i class="bi bi-info-circle"></i>
+                        <p>Nenhum usuário encontrado</p>
+                        <small style="display: block; margin-top: 1rem;">
+                            <strong>Alternativa:</strong> Digite o ID diretamente<br>
+                            <input type="number"
+                                   placeholder="Ex: 123"
+                                   style="margin-top: 0.5rem; padding: 0.5rem; border-radius: 8px; border: 2px solid var(--border-color); width: 150px;"
+                                   onchange="selectUserById(this.value)">
+                        </small>
+                    </div>
+                `;
+                return;
+            }
+
+            // Renderiza os resultados
+            let html = '';
+            data.usuarios.forEach(user => {
+                const initial = user.first_name ? user.first_name[0].toUpperCase() : user.username[0].toUpperCase();
+                html += `
+                    <div class="search-result-item" onclick="selectUser(${JSON.stringify(user).replace(/"/g, '&quot;')})">
+                        <div class="search-result-avatar">${initial}</div>
+                        <div class="search-result-info">
+                            <p class="search-result-name">${user.full_name}</p>
+                            <p class="search-result-username">@${user.username} • ID: ${user.id}</p>
+                        </div>
+                    </div>
+                `;
+            });
+            searchResults.innerHTML = html;
+        })
+        .catch(error => {
+            console.error('Erro na busca:', error);
+            searchResults.innerHTML = `
+                <div class="search-no-results">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <p>Erro ao buscar usuários. Tente novamente.</p>
+                </div>
+            `;
+        });
 }
 
 // Seleção direta por ID

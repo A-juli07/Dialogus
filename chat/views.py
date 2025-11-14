@@ -226,7 +226,7 @@ def rejeitar_convite_dm(request, convite_id):
 @login_required
 def perfil(request):
     perfil, created = Perfil.objects.get_or_create(usuario=request.user)
-    
+
     if request.method == 'POST':
         form = PerfilForm(request.POST, request.FILES, instance=perfil)
         if form.is_valid():
@@ -234,5 +234,33 @@ def perfil(request):
             return redirect('perfil')  # Redireciona de volta para a tela de perfil
     else:
         form = PerfilForm(instance=perfil)
-    
+
     return render(request, 'chat/perfil.html', {'form': form, 'perfil': perfil})
+
+@login_required
+def buscar_usuarios(request):
+    from django.http import JsonResponse
+
+    query = request.GET.get('q', '').strip()
+
+    if len(query) < 2:
+        return JsonResponse({'usuarios': []})
+
+    # Busca usuários por username ou first_name/last_name
+    usuarios = User.objects.filter(
+        Q(username__icontains=query) |
+        Q(first_name__icontains=query) |
+        Q(last_name__icontains=query)
+    ).exclude(id=request.user.id)[:10]  # Limita a 10 resultados e exclui o próprio usuário
+
+    resultado = []
+    for user in usuarios:
+        resultado.append({
+            'id': user.id,
+            'username': user.username,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'full_name': f"{user.first_name} {user.last_name}".strip() or user.username
+        })
+
+    return JsonResponse({'usuarios': resultado})

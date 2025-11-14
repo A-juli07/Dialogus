@@ -9,19 +9,35 @@ class PerfilForm(forms.ModelForm):
 
 
 class SalaForm(forms.ModelForm):
+    descricao = forms.CharField(
+        required=False,
+        max_length=500,
+        widget=forms.Textarea(attrs={'rows': 3}),
+        label='Descrição',
+        help_text='Descreva sobre o que é este grupo (opcional)'
+    )
+    privada = forms.BooleanField(
+        required=False,
+        initial=False,
+        label='Sala Privada'
+    )
+
     class Meta:
         model = Sala
-        fields = ['nome', 'publica', 'senha']
+        fields = ['nome', 'senha']
         widgets = {
             'senha': forms.PasswordInput(render_value=True),
         }
 
-    publica = forms.BooleanField(required=False)  # <-- ESSENCIAL
-
     def clean(self):
         cleaned_data = super().clean()
-        publica = cleaned_data.get('publica')
+        privada = cleaned_data.get('privada')
         senha = cleaned_data.get('senha')
 
-        if not publica and not senha:
+        # Se privada for True, publica deve ser False, e vice-versa
+        cleaned_data['publica'] = not privada
+
+        if privada and not senha:
             self.add_error('senha', 'Salas privadas precisam de uma senha.')
+
+        return cleaned_data

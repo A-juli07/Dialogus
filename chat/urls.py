@@ -16,4 +16,5 @@ urlpatterns = [
     path('dm/rejeitar/<int:convite_id>/', views.rejeitar_convite_dm, name='rejeitar_convite_dm'),
     path('dm/<int:user_id>/', views.sala_privada_dm, name='sala_privada_dm'),
     path('perfil/', views.perfil, name='perfil'),
+    path('api/buscar-usuarios/', views.buscar_usuarios, name='buscar_usuarios'),
 ]
