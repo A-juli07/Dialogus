@@ -544,6 +544,11 @@ textarea.form-control-modern {
 </style>
 
 <script>
+// Preview elements - declare first
+const previewName = document.getElementById('previewName');
+const previewDesc = document.getElementById('previewDesc');
+const previewPrivacy = document.getElementById('previewPrivacy');
+
 // Character counter
 const textarea = document.getElementById('{{ form.descricao.id_for_label }}');
 const charCount = document.getElementById('charCount');
@@ -571,16 +576,20 @@ function updatePrivacyUI() {
         passwordField.style.display = 'block';
         privadaInput.value = 'on';
         // Update preview
-        previewPrivacy.innerHTML = '<i class="bi bi-lock"></i> Privado';
-        previewPrivacy.className = 'badge-private';
+        if (previewPrivacy) {
+            previewPrivacy.innerHTML = '<i class="bi bi-lock"></i> Privado';
+            previewPrivacy.className = 'badge-private';
+        }
     } else {
         publicOption.classList.add('selected');
         privateOption.classList.remove('selected');
         passwordField.style.display = 'none';
         privadaInput.value = '';
         // Update preview
-        previewPrivacy.innerHTML = '<i class="bi bi-globe"></i> Público';
-        previewPrivacy.className = 'badge-public';
+        if (previewPrivacy) {
+            previewPrivacy.innerHTML = '<i class="bi bi-globe"></i> Público';
+            previewPrivacy.className = 'badge-public';
+        }
     }
 }
 
@@ -616,12 +625,9 @@ function togglePassword(fieldId) {
 // Preview update functionality
 const nomeInput = document.getElementById('{{ form.nome.id_for_label }}');
 const descricaoInput = document.getElementById('{{ form.descricao.id_for_label }}');
-const previewName = document.getElementById('previewName');
-const previewDesc = document.getElementById('previewDesc');
-const previewPrivacy = document.getElementById('previewPrivacy');
 
 // Update preview nome
-if (nomeInput) {
+if (nomeInput && previewName) {
     nomeInput.addEventListener('input', function() {
         const value = this.value.trim();
         previewName.textContent = value || 'Nome do Grupo';
@@ -629,7 +635,7 @@ if (nomeInput) {
 }
 
 // Update preview descrição
-if (descricaoInput) {
+if (descricaoInput && previewDesc) {
     descricaoInput.addEventListener('input', function() {
         const value = this.value.trim();
         previewDesc.textContent = value || 'Sem descrição';
