@@ -5,13 +5,10 @@ set -e
 
 echo "🚀 Starting Dialogus..."
 
-# Wait for Redis to be ready
+# Wait for Redis to be ready (simple wait)
 echo "⏳ Waiting for Redis..."
-until redis-cli -h redis ping 2>/dev/null; do
-  echo "Redis is unavailable - sleeping"
-  sleep 2
-done
-echo "✅ Redis is ready!"
+sleep 5
+echo "✅ Continuing..."
 
 # Apply database migrations
 echo "📦 Applying database migrations..."
