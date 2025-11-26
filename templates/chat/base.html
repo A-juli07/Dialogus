@@ -32,11 +32,11 @@
 </head>
 
 <body>
-    <!-- Navbar Moderna com Gradiente -->
-    <nav class="navbar navbar-dark navbar-modern fixed-top">
+    <!-- Navbar Moderna com Novas Cores -->
+    <nav class="navbar navbar-dark navbar-modern fixed-top" style="background: var(--bg-sidebar) !important;">
         <div class="container-fluid">
             <div class="d-flex align-items-center gap-3">
-                <button class="btn btn-light btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu">
+                <button class="btn btn-sm" style="background: var(--lime-primary); color: var(--text-primary);" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu">
                     <i class="bi bi-list fs-5"></i>
                 </button>
                 <span class="navbar-brand mb-0">
@@ -51,7 +51,7 @@
                     <i class="bi bi-person-circle me-2"></i>
                     <strong>{{ user.username }}</strong>
                 </span>
-                <span class="badge bg-light text-dark">
+                <span class="badge" style="background: var(--lime-primary); color: var(--text-primary);">
                     ID: {{ user.id }}
                 </span>
             </div>
@@ -60,9 +60,9 @@
     </nav>
 
     <!-- Sidebar Retrátil Moderna (Offcanvas) -->
-    <div class="offcanvas offcanvas-start offcanvas-modern" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel">
-        <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="sidebarMenuLabel">
+    <div class="offcanvas offcanvas-start offcanvas-modern" tabindex="-1" id="sidebarMenu" aria-labelledby="sidebarMenuLabel" style="background: var(--bg-sidebar);">
+        <div class="offcanvas-header" style="background: var(--bg-sidebar-dark);">
+            <h5 class="offcanvas-title text-white" id="sidebarMenuLabel">
                 <i class="bi bi-chat-dots-fill me-2"></i>
                 Dialogus
             </h5>
@@ -71,14 +71,14 @@
         <div class="offcanvas-body">
             {% if user.is_authenticated %}
             <!-- Perfil do Usuário na Sidebar -->
-            <div class="user-profile-sidebar mb-4 p-3 rounded-medium" style="background: var(--bg-tertiary);">
+            <div class="user-profile-sidebar mb-4 p-3 rounded-medium" style="background: rgba(255, 255, 255, 0.1);">
                 <div class="d-flex align-items-center gap-3">
-                    <div class="contact-avatar" style="width: 48px; height: 48px;">
+                    <div class="contact-avatar" style="width: 48px; height: 48px; background: var(--lime-primary); color: var(--text-primary);">
                         {{ user.username|slice:":1"|upper }}
                     </div>
                     <div>
-                        <div class="fw-bold">{{ user.username }}</div>
-                        <small class="text-muted">ID: {{ user.id }}</small>
+                        <div class="fw-bold text-white">{{ user.username }}</div>
+                        <small class="text-white-50">ID: {{ user.id }}</small>
                     </div>
                 </div>
             </div>

@@ -7,20 +7,20 @@
     <!-- Header -->
     <div class="row mb-4">
         <div class="col-12">
-            <div class="card-modern" style="background: var(--gradient-primary); color: white; padding: 2rem;">
+            <div class="card-modern" style="background: var(--bg-sidebar); color: white; padding: 2rem; border-radius: var(--border-radius-lg);">
                 <div class="row align-items-center">
                     <div class="col-md-8">
                         <h1 class="mb-2">
                             <i class="bi bi-people-fill me-3"></i>
                             Grupos de Chat
                         </h1>
-                        <p class="mb-0 opacity-75">
+                        <p class="mb-0" style="opacity: 0.9;">
                             <i class="bi bi-grid-3x3-gap-fill me-2"></i>
                             Explore grupos públicos ou acesse seus grupos privados
                         </p>
                     </div>
                     <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                        <a href="{% url 'criar_sala' %}" class="btn btn-light btn-modern">
+                        <a href="{% url 'criar_sala' %}" class="btn btn-modern" style="background: var(--lime-primary); color: var(--text-primary);">
                             <i class="bi bi-plus-circle-fill me-2"></i>
                             Criar Novo Grupo
                         </a>
@@ -34,11 +34,11 @@
     <div class="row mb-5">
         <div class="col-12">
             <div class="d-flex align-items-center justify-content-between mb-3">
-                <h3 class="mb-0">
-                    <i class="bi bi-globe text-gradient"></i>
+                <h3 class="mb-0" style="color: var(--bg-sidebar);">
+                    <i class="bi bi-globe me-2"></i>
                     Grupos Públicos
                 </h3>
-                <span class="badge badge-modern" style="background: var(--gradient-success); color: white;">
+                <span class="badge badge-modern" style="background: var(--lime-primary); color: var(--text-primary);">
                     {{ salas_publicas|length }} grupos
                 </span>
             </div>
@@ -47,14 +47,14 @@
                 <div class="rooms-grid">
                     {% for sala in salas_publicas %}
                         <div class="room-card">
-                            <div class="room-card-icon" style="background: var(--gradient-success);">
+                            <div class="room-card-icon" style="background: var(--bg-sidebar); color: white;">
                                 <i class="bi bi-people-fill"></i>
                             </div>
                             <h5 class="room-card-title">{{ sala.nome }}</h5>
                             <p class="room-card-description">
                                 <i class="bi bi-person-fill"></i> Criado por <strong>{{ sala.dono.username }}</strong>
                             </p>
-                            <a href="{% url 'room' room_name=sala.nome %}" class="btn btn-gradient-success w-100 btn-modern">
+                            <a href="{% url 'room' room_name=sala.nome %}" class="btn w-100 btn-modern" style="background: var(--lime-primary); color: var(--text-primary);">
                                 <i class="bi bi-box-arrow-in-right me-2"></i>
                                 Entrar
                             </a>
@@ -64,10 +64,10 @@
             {% else %}
                 <div class="card-modern">
                     <div class="card-body text-center py-5">
-                        <i class="bi bi-globe" style="font-size: 4rem; opacity: 0.2;"></i>
+                        <i class="bi bi-globe" style="font-size: 4rem; opacity: 0.2; color: var(--bg-sidebar);"></i>
                         <h5 class="mt-3 text-muted">Nenhum grupo público disponível</h5>
                         <p class="text-muted mb-4">Seja o primeiro a criar um grupo público!</p>
-                        <a href="{% url 'criar_sala' %}" class="btn btn-gradient-primary btn-modern">
+                        <a href="{% url 'criar_sala' %}" class="btn btn-modern" style="background: var(--lime-primary); color: var(--text-primary);">
                             <i class="bi bi-plus-circle-fill me-2"></i>
                             Criar Primeiro Grupo
                         </a>
@@ -81,11 +81,11 @@
     <div class="row mb-5">
         <div class="col-12">
             <div class="d-flex align-items-center justify-content-between mb-3">
-                <h3 class="mb-0">
-                    <i class="bi bi-shield-lock-fill text-gradient"></i>
+                <h3 class="mb-0" style="color: var(--bg-sidebar);">
+                    <i class="bi bi-shield-lock-fill me-2"></i>
                     Meus Grupos Privados
                 </h3>
-                <span class="badge badge-modern" style="background: var(--gradient-primary); color: white;">
+                <span class="badge badge-modern" style="background: var(--bg-sidebar); color: white;">
                     {{ minhas_salas_privadas|length }} grupos
                 </span>
             </div>
@@ -95,10 +95,10 @@
                     {% for sala in minhas_salas_privadas %}
                         <div class="room-card">
                             <div class="d-flex justify-content-between align-items-start mb-3">
-                                <div class="room-card-icon" style="background: var(--gradient-primary); width: 50px; height: 50px;">
+                                <div class="room-card-icon" style="background: var(--bg-sidebar); color: white; width: 50px; height: 50px;">
                                     <i class="bi bi-shield-lock-fill"></i>
                                 </div>
-                                <span class="badge bg-primary">
+                                <span class="badge" style="background: var(--lime-primary); color: var(--text-primary);">
                                     <i class="bi bi-crown-fill"></i> Dono
                                 </span>
                             </div>
@@ -107,7 +107,7 @@
                                 <i class="bi bi-key-fill"></i> Grupo privado com senha
                             </p>
                             <div class="d-grid gap-2">
-                                <a href="{% url 'room' room_name=sala.nome %}" class="btn btn-gradient-primary btn-modern">
+                                <a href="{% url 'room' room_name=sala.nome %}" class="btn btn-modern" style="background: var(--bg-sidebar); color: white;">
                                     <i class="bi bi-box-arrow-in-right me-2"></i>
                                     Entrar
                                 </a>
@@ -122,10 +122,10 @@
             {% else %}
                 <div class="card-modern">
                     <div class="card-body text-center py-5">
-                        <i class="bi bi-shield-lock" style="font-size: 4rem; opacity: 0.2;"></i>
+                        <i class="bi bi-shield-lock" style="font-size: 4rem; opacity: 0.2; color: var(--bg-sidebar);"></i>
                         <h5 class="mt-3 text-muted">Você não tem grupos privados</h5>
                         <p class="text-muted mb-4">Crie um grupo privado para conversas exclusivas</p>
-                        <a href="{% url 'criar_sala' %}" class="btn btn-gradient-primary btn-modern">
+                        <a href="{% url 'criar_sala' %}" class="btn btn-modern" style="background: var(--lime-primary); color: var(--text-primary);">
                             <i class="bi bi-plus-circle-fill me-2"></i>
                             Criar Grupo Privado
                         </a>
@@ -139,11 +139,11 @@
     <div class="row mb-4">
         <div class="col-12">
             <div class="d-flex align-items-center justify-content-between mb-3">
-                <h3 class="mb-0">
-                    <i class="bi bi-unlock-fill text-gradient"></i>
+                <h3 class="mb-0" style="color: var(--bg-sidebar);">
+                    <i class="bi bi-unlock-fill me-2"></i>
                     Grupos Privados Acessados
                 </h3>
-                <span class="badge badge-modern" style="background: var(--gradient-secondary); color: white;">
+                <span class="badge badge-modern" style="background: var(--bg-chat); color: white;">
                     {{ salas_autorizadas|length }} grupos
                 </span>
             </div>
@@ -152,7 +152,7 @@
                 <div class="rooms-grid">
                     {% for sala in salas_autorizadas %}
                         <div class="room-card">
-                            <div class="room-card-icon" style="background: var(--gradient-secondary);">
+                            <div class="room-card-icon" style="background: var(--bg-chat); color: white;">
                                 <i class="bi bi-unlock-fill"></i>
                             </div>
                             <h5 class="room-card-title">{{ sala.nome }}</h5>

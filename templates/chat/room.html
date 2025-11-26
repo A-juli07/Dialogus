@@ -1,40 +1,34 @@
-{% extends 'chat/base.html' %}
+{% extends 'chat/chat_layout.html' %}
 
 {% block title %}{{ room_name }} - Dialogus{% endblock %}
 
-{% block content %}
-<div class="chat-container fade-in">
-    <!-- Cabeçalho do Chat -->
-    <div class="chat-header">
-        <div class="d-flex align-items-center gap-3">
-            <a href="{% url 'index' %}" class="btn btn-light btn-sm rounded-circle" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-                <i class="bi bi-arrow-left"></i>
-            </a>
-            <div class="contact-avatar" style="width: 45px; height: 45px;">
-                {% if '_' in room_name %}
-                    <i class="bi bi-person-fill"></i>
-                {% else %}
-                    <i class="bi bi-people-fill"></i>
-                {% endif %}
-            </div>
-            <div class="flex-grow-1">
-                <h2 class="mb-0" style="font-size: 1.25rem;">
-                    {% if '_' in room_name %}
-                        DM Privada
-                    {% else %}
-                        {{ room_name }}
-                    {% endif %}
-                </h2>
-                <small style="opacity: 0.8;">
-                    {% if '_' in room_name %}
-                        <i class="bi bi-shield-lock-fill"></i> Mensagens criptografadas
-                    {% else %}
-                        <i class="bi bi-people"></i> Sala de grupo
-                    {% endif %}
-                </small>
-            </div>
-        </div>
+{% block chat_content %}
+<!-- Cabeçalho do Chat -->
+<div class="chat-header">
+    <div class="contact-avatar" style="width: 45px; height: 45px;">
+        {% if '_' in room_name %}
+            <i class="bi bi-person-fill"></i>
+        {% else %}
+            <i class="bi bi-people-fill"></i>
+        {% endif %}
     </div>
+    <div class="flex-grow-1">
+        <h2 class="mb-0">
+            {% if '_' in room_name %}
+                {{ other_user.username }}
+            {% else %}
+                {{ room_name }}
+            {% endif %}
+        </h2>
+        <small style="color: var(--text-secondary); font-size: 0.85rem;">
+            {% if '_' in room_name %}
+                <i class="bi bi-shield-lock-fill"></i> Mensagens privadas
+            {% else %}
+                <i class="bi bi-people"></i> Grupo
+            {% endif %}
+        </small>
+    </div>
+</div>
 
     <!-- Log de Mensagens -->
     <div id="chat-log" class="chat-log">
@@ -99,6 +93,7 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
 <style>
     /* Indicador de digitação */
@@ -208,8 +203,6 @@
         }
     }
 </style>
-
-{% endblock %}
 
 {% block extra_js %}
 <script>

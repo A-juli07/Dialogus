@@ -1,0 +1,232 @@
+{% extends 'chat/chat_layout.html' %}
+
+{% block title %}Grupos - Dialogus{% endblock %}
+
+{% block sidebar_content %}
+<div class="contact-list">
+    <!-- DMs -->
+    {% if dms %}
+        <div class="px-3 py-2">
+            <small class="text-white-50 text-uppercase" style="font-size: 0.75rem; font-weight: 600;">Mensagens Diretas</small>
+        </div>
+        {% for dm in dms %}
+            <a href="{% url 'room' room_name=dm.get_nome_sala %}" class="contact-item">
+                <div class="contact-avatar">
+                    {% if dm.usuario1 == user %}
+                        {{ dm.usuario2.username|slice:":1"|upper }}
+                    {% else %}
+                        {{ dm.usuario1.username|slice:":1"|upper }}
+                    {% endif %}
+                </div>
+                <div class="contact-info">
+                    <div class="contact-name">
+                        {% if dm.usuario1 == user %}
+                            {{ dm.usuario2.username }}
+                        {% else %}
+                            {{ dm.usuario1.username }}
+                        {% endif %}
+                    </div>
+                    <div class="contact-preview">Mensagem privada</div>
+                </div>
+            </a>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Grupos -->
+    {% if salas %}
+        <div class="px-3 py-2 mt-3">
+            <small class="text-white-50 text-uppercase" style="font-size: 0.75rem; font-weight: 600;">Grupos</small>
+        </div>
+        {% for sala in salas %}
+            <a href="{% url 'room' room_name=sala.nome %}" class="contact-item">
+                <div class="contact-avatar">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div class="contact-info">
+                    <div class="contact-name">{{ sala.nome }}</div>
+                    <div class="contact-preview">
+                        {% if sala.publica %}Grupo público{% else %}Grupo privado{% endif %}
+                    </div>
+                </div>
+            </a>
+        {% endfor %}
+    {% endif %}
+
+    {% if not dms and not salas %}
+        <div class="text-center text-white-50 py-5 px-3">
+            <i class="bi bi-chat-dots" style="font-size: 3rem; opacity: 0.3;"></i>
+            <p class="mt-3 mb-0" style="font-size: 0.9rem;">Nenhuma conversa ainda</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block chat_content %}
+<!-- Área Principal de Salas -->
+<div class="p-4" style="background: var(--bg-secondary); height: 100%; overflow-y: auto;">
+    <!-- Header -->
+    <div class="mb-4">
+        <h1 class="mb-2" style="color: var(--bg-sidebar);">
+            <i class="bi bi-people-fill me-3"></i>
+            Grupos de Chat
+        </h1>
+        <p class="text-muted mb-0">
+            <i class="bi bi-grid-3x3-gap-fill me-2"></i>
+            Explore grupos públicos ou acesse seus grupos privados
+        </p>
+    </div>
+
+    <!-- Grupos Públicos -->
+    <div class="mb-5">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h3 class="mb-0" style="color: var(--bg-sidebar);">
+                <i class="bi bi-globe me-2"></i>
+                Grupos Públicos
+            </h3>
+            <span class="badge badge-modern" style="background: var(--lime-primary); color: var(--text-primary);">
+                {{ salas_publicas|length }} grupos
+            </span>
+        </div>
+
+        {% if salas_publicas %}
+            <div class="rooms-grid">
+                {% for sala in salas_publicas %}
+                    <div class="room-card">
+                        <div class="room-card-icon" style="background: var(--bg-sidebar); color: white;">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                        <h5 class="room-card-title">{{ sala.nome }}</h5>
+                        <p class="room-card-description">
+                            <i class="bi bi-person-fill"></i> Criado por <strong>{{ sala.dono.username }}</strong>
+                        </p>
+                        <a href="{% url 'room' room_name=sala.nome %}" class="btn w-100 btn-modern" style="background: var(--lime-primary); color: var(--text-primary);">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>
+                            Entrar
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="card-modern">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-globe" style="font-size: 4rem; opacity: 0.2; color: var(--bg-sidebar);"></i>
+                    <h5 class="mt-3 text-muted">Nenhum grupo público disponível</h5>
+                    <p class="text-muted mb-4">Seja o primeiro a criar um grupo público!</p>
+                    <a href="{% url 'criar_sala' %}" class="btn btn-modern" style="background: var(--lime-primary); color: var(--text-primary);">
+                        <i class="bi bi-plus-circle-fill me-2"></i>
+                        Criar Primeiro Grupo
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Meus Grupos Privados -->
+    <div class="mb-5">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h3 class="mb-0" style="color: var(--bg-sidebar);">
+                <i class="bi bi-shield-lock-fill me-2"></i>
+                Meus Grupos Privados
+            </h3>
+            <span class="badge badge-modern" style="background: var(--bg-sidebar); color: white;">
+                {{ minhas_salas_privadas|length }} grupos
+            </span>
+        </div>
+
+        {% if minhas_salas_privadas %}
+            <div class="rooms-grid">
+                {% for sala in minhas_salas_privadas %}
+                    <div class="room-card">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div class="room-card-icon" style="background: var(--bg-sidebar); color: white; width: 50px; height: 50px;">
+                                <i class="bi bi-shield-lock-fill"></i>
+                            </div>
+                            <span class="badge" style="background: var(--lime-primary); color: var(--text-primary);">
+                                <i class="bi bi-crown-fill"></i> Dono
+                            </span>
+                        </div>
+                        <h5 class="room-card-title">{{ sala.nome }}</h5>
+                        <p class="room-card-description">
+                            <i class="bi bi-key-fill"></i> Grupo privado com senha
+                        </p>
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'room' room_name=sala.nome %}" class="btn btn-modern" style="background: var(--bg-sidebar); color: white;">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>
+                                Entrar
+                            </a>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="copyInviteLink('{{ sala.token }}')">
+                                <i class="bi bi-link-45deg me-1"></i>
+                                Copiar Link de Convite
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="card-modern">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-shield-lock" style="font-size: 4rem; opacity: 0.2; color: var(--bg-sidebar);"></i>
+                    <h5 class="mt-3 text-muted">Você não tem grupos privados</h5>
+                    <p class="text-muted mb-4">Crie um grupo privado para conversas exclusivas</p>
+                    <a href="{% url 'criar_sala' %}" class="btn btn-modern" style="background: var(--lime-primary); color: var(--text-primary);">
+                        <i class="bi bi-plus-circle-fill me-2"></i>
+                        Criar Grupo Privado
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Grupos Privados Acessados -->
+    <div class="mb-4">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <h3 class="mb-0" style="color: var(--bg-sidebar);">
+                <i class="bi bi-unlock-fill me-2"></i>
+                Grupos Privados Acessados
+            </h3>
+            <span class="badge badge-modern" style="background: var(--bg-chat); color: white;">
+                {{ salas_autorizadas|length }} grupos
+            </span>
+        </div>
+
+        {% if salas_autorizadas %}
+            <div class="rooms-grid">
+                {% for sala in salas_autorizadas %}
+                    <div class="room-card">
+                        <div class="room-card-icon" style="background: var(--bg-chat); color: white;">
+                            <i class="bi bi-unlock-fill"></i>
+                        </div>
+                        <h5 class="room-card-title">{{ sala.nome }}</h5>
+                        <p class="room-card-description">
+                            <i class="bi bi-person-fill"></i> Criado por <strong>{{ sala.dono.username }}</strong>
+                        </p>
+                        <a href="{% url 'room' room_name=sala.nome %}" class="btn btn-gradient-secondary w-100 btn-modern">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>
+                            Entrar
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="card-modern">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-unlock" style="font-size: 4rem; opacity: 0.2; color: var(--bg-sidebar);"></i>
+                    <h5 class="mt-3 text-muted">Nenhum grupo privado acessado</h5>
+                    <p class="text-muted mb-0">Você verá aqui os grupos privados que acessou via senha ou convite</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    function copyInviteLink(token) {
+        const link = window.location.origin + '/chat/convite/' + token + '/';
+        navigator.clipboard.writeText(link).then(() => {
+            alert('Link de convite copiado: ' + link);
+        }).catch(err => {
+            console.error('Erro ao copiar:', err);
+        });
+    }
+</script>
+{% endblock %}

@@ -14,8 +14,8 @@ class ThemeManager {
         // Aplicar tema salvo
         this.applyTheme(this.currentTheme);
 
-        // Criar botão de toggle
-        this.createToggleButton();
+        // Criar botão de toggle - DESABILITADO (seletor na sidebar)
+        // this.createToggleButton();
     }
 
     applyTheme(theme) {

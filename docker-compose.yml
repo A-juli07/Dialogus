@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  # Redis service for Django Channels
+  redis:
+    image: redis:7-alpine
+    container_name: dialogus_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    networks:
+      - dialogus_network
+
+  # Django application with Daphne (ASGI server)
+  web:
+    build: .
+    container_name: dialogus_web
+    command: daphne -b 0.0.0.0 -p 8000 chatproject.asgi:application
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=True
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - dialogus_network
+
+volumes:
+  redis_data:
+  static_volume:
+  media_volume:
+
+networks:
+  dialogus_network:
+    driver: bridge

@@ -10,7 +10,8 @@ from .models import Mensagem, MensagemDM, Perfil, Sala, SalaPrivada, Amizade
 from .forms import PerfilForm, SalaForm
 
 @login_required
-def index(request):
+def convites(request):
+    """View de convites - mostra convites recebidos e enviados"""
     user = request.user
 
     # DMs ativas (salas privadas)
@@ -45,11 +46,17 @@ def register(request):
 
 @login_required
 def escolher_sala(request):
+    """View principal - mostra salas e conversas"""
+    user = request.user
+
+    # DMs ativas (para a sidebar)
+    dms = SalaPrivada.objects.filter(Q(usuario1=user) | Q(usuario2=user))
+
     # Salas públicas visíveis a todos
     salas_publicas = Sala.objects.filter(publica=True)
 
     # Salas privadas onde o usuário é dono
-    minhas_salas_privadas = Sala.objects.filter(publica=False, dono=request.user)
+    minhas_salas_privadas = Sala.objects.filter(publica=False, dono=user)
 
     # Salas privadas que o usuário acessou via senha
     salas_autorizadas_ids = [
@@ -58,9 +65,14 @@ def escolher_sala(request):
         if chave.startswith("sala_") and autorizado
     ]
 
-    salas_autorizadas = Sala.objects.filter(id__in=salas_autorizadas_ids, publica=False).exclude(dono=request.user)
+    salas_autorizadas = Sala.objects.filter(id__in=salas_autorizadas_ids, publica=False).exclude(dono=user)
 
-    return render(request, 'chat/salas.html', {
+    # Todas as salas para a sidebar
+    salas = list(salas_publicas) + list(minhas_salas_privadas) + list(salas_autorizadas)
+
+    return render(request, 'chat/salas_new.html', {
+        'dms': dms,
+        'salas': salas,
         'salas_publicas': salas_publicas,
         'minhas_salas_privadas': minhas_salas_privadas,
         'salas_autorizadas': salas_autorizadas,
@@ -87,6 +99,22 @@ def redirecionar_para_sala(request):
 
 @login_required
 def room(request, room_name):
+    user = request.user
+
+    # Buscar todas as DMs do usuário para a sidebar
+    dms = SalaPrivada.objects.filter(Q(usuario1=user) | Q(usuario2=user))
+
+    # Buscar todas as salas (grupos) do usuário para a sidebar
+    salas_publicas = Sala.objects.filter(publica=True)
+    minhas_salas_privadas = Sala.objects.filter(publica=False, dono=user)
+    salas_autorizadas_ids = [
+        int(chave.split('_')[1])
+        for chave, autorizado in request.session.items()
+        if chave.startswith("sala_") and autorizado
+    ]
+    salas_autorizadas = Sala.objects.filter(id__in=salas_autorizadas_ids, publica=False).exclude(dono=user)
+    salas = list(salas_publicas) + list(minhas_salas_privadas) + list(salas_autorizadas)
+
     # Verifica se é uma sala DM pelo formato esperado "id1_id2"
     if '_' in room_name:
         try:
@@ -98,23 +126,32 @@ def room(request, room_name):
         except (ValueError, SalaPrivada.DoesNotExist):
             raise Http404("Sala privada de DM não encontrada.")
 
-        MensagemDM.objects.filter(sala_dm=sala_dm, lida=False).exclude(usuario=request.user).update(lida=True)
-        
+        MensagemDM.objects.filter(sala_dm=sala_dm, lida=False).exclude(usuario=user).update(lida=True)
+
+        # Determinar o outro usuário
+        other_user = sala_dm.usuario2 if sala_dm.usuario1 == user else sala_dm.usuario1
+
         # Usamos MensagemDM para mensagens privadas
         mensagens = MensagemDM.objects.filter(sala_dm=sala_dm).order_by('timestamp')[:50]
         return render(request, 'chat/room.html', {
             'room_name': room_name,
-            'mensagens': mensagens
+            'mensagens': mensagens,
+            'dms': dms,
+            'salas': salas,
+            'other_user': other_user
         })
 
     # Caso contrário, é uma sala de grupo normal (com base no nome da sala)
     sala = get_object_or_404(Sala, nome=room_name)
 
-    if sala.publica or sala.dono == request.user:
+    if sala.publica or sala.dono == user:
         mensagens = Mensagem.objects.filter(sala=sala).order_by('timestamp')[:50]
         return render(request, 'chat/room.html', {
             'room_name': sala.nome,
-            'mensagens': mensagens
+            'mensagens': mensagens,
+            'dms': dms,
+            'salas': salas,
+            'other_user': None
         })
 
     if request.method == 'POST':
@@ -132,7 +169,10 @@ def room(request, room_name):
     mensagens = Mensagem.objects.filter(sala=sala).order_by('timestamp')[:50]
     return render(request, 'chat/room.html', {
         'room_name': sala.nome,
-        'mensagens': mensagens
+        'mensagens': mensagens,
+        'dms': dms,
+        'salas': salas,
+        'other_user': None
     })
 
 @login_required

@@ -80,3 +80,8 @@ dump.rdb
 node_modules/
 npm-debug.log
 yarn-error.log
+
+# Docker
+*.env
+.dockerignore
+docker-compose.override.yml

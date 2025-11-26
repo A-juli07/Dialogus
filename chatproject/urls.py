@@ -6,7 +6,8 @@ from chat import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.index, name='index'),
+    path('', views.escolher_sala, name='index'),  # Página principal agora é a de salas
+    path('convites/', views.convites, name='convites'),  # Página de convites
     path('register/', views.register, name='register'),
     path('chat/', include('chat.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
