@@ -29,6 +29,7 @@ class Mensagem(models.Model):
     sala = models.ForeignKey(Sala, on_delete=models.CASCADE)  # Agora se refere ao modelo Sala
     conteudo = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
+    lida = models.BooleanField(default=False)
 
     def __str__(self):
         return f"[{self.timestamp:%H:%M}] {self.usuario.username}: {self.conteudo}"

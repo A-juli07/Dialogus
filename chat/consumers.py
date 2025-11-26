@@ -20,7 +20,8 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             'type': 'nova_dm',
             'sala_id': event['sala_id'],
-            'from_user': event['from_user']
+            'from_user': event['from_user'],
+            'unread_count': event.get('unread_count', 1)
         }))
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -49,7 +50,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         user = self.scope["user"]
 
         if user.is_authenticated:
-            destinatario_id, sala_id = await self.salvar_mensagem(user, self.room_name, message)
+            destinatario_id, sala_id, unread_count = await self.salvar_mensagem(user, self.room_name, message)
 
             # Notifica o destinatário se for DM
             if destinatario_id:
@@ -59,6 +60,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                         'type': 'nova_dm',
                         'sala_id': sala_id,
                         'from_user': user.username,
+                        'unread_count': unread_count,
                     }
                 )
 
@@ -75,7 +77,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             'type': 'nova_dm',
             'sala_id': event['sala_id'],
-            'from_user': event['from_user']
+            'from_user': event['from_user'],
+            'unread_count': event.get('unread_count', 1)
         }))
 
     @sync_to_async
@@ -90,9 +93,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
             # Identificar destinatário
             destinatario = sala_dm.usuario2 if sala_dm.usuario1 == usuario else sala_dm.usuario1
 
-            return destinatario.id, sala_dm.id  # retorna quem deve ser notificado e qual sala
+            # Contar mensagens não lidas do destinatário nesta sala
+            unread_count = MensagemDM.objects.filter(
+                sala_dm=sala_dm,
+                lida=False
+            ).exclude(usuario=destinatario).count()
+
+            return destinatario.id, sala_dm.id, unread_count
         else:
             sala = Sala.objects.get(nome=nome_sala)
             Mensagem.objects.create(usuario=usuario, sala=sala, conteudo=conteudo)
-            return None, None
+            return None, None, None
 

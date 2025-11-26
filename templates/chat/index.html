@@ -347,19 +347,20 @@
 
                 // Adicionar animação de pulso
                 badge.style.animation = 'pulse 0.5s ease';
-
-                // Notificação visual
-                if (typeof Dialogus !== 'undefined') {
-                    Dialogus.NotificationManager.show(
-                        `Nova mensagem de ${data.from_user}`,
-                        'info',
-                        3000
-                    );
-                }
-
-                // Som de notificação (opcional)
-                // playNotificationSound();
             }
+
+            // Notificação visual com contador de mensagens não lidas
+            if (typeof Dialogus !== 'undefined') {
+                Dialogus.NotificationManager.show(
+                    `Nova mensagem de ${data.from_user}`,
+                    'info',
+                    3000,
+                    data.unread_count
+                );
+            }
+
+            // Som de notificação (opcional)
+            // playNotificationSound();
         }
     };
 

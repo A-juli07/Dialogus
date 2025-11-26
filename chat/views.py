@@ -52,6 +52,12 @@ def escolher_sala(request):
     # DMs ativas (para a sidebar)
     dms = SalaPrivada.objects.filter(Q(usuario1=user) | Q(usuario2=user))
 
+    # Contar mensagens não lidas para cada DM
+    dm_unread = {}
+    for dm in dms:
+        count = MensagemDM.objects.filter(sala_dm=dm, lida=False).exclude(usuario=user).count()
+        dm_unread[dm.id] = count
+
     # Salas públicas visíveis a todos
     salas_publicas = Sala.objects.filter(publica=True)
 
@@ -70,12 +76,20 @@ def escolher_sala(request):
     # Todas as salas para a sidebar
     salas = list(salas_publicas) + list(minhas_salas_privadas) + list(salas_autorizadas)
 
+    # Contar mensagens não lidas para cada sala
+    sala_unread = {}
+    for sala in salas:
+        count = Mensagem.objects.filter(sala=sala, lida=False).exclude(usuario=user).count()
+        sala_unread[sala.id] = count
+
     return render(request, 'chat/salas_new.html', {
         'dms': dms,
         'salas': salas,
         'salas_publicas': salas_publicas,
         'minhas_salas_privadas': minhas_salas_privadas,
         'salas_autorizadas': salas_autorizadas,
+        'dm_unread': dm_unread,
+        'sala_unread': sala_unread,
     })
 
 @login_required
@@ -104,6 +118,12 @@ def room(request, room_name):
     # Buscar todas as DMs do usuário para a sidebar
     dms = SalaPrivada.objects.filter(Q(usuario1=user) | Q(usuario2=user))
 
+    # Contar mensagens não lidas para cada DM
+    dm_unread = {}
+    for dm in dms:
+        count = MensagemDM.objects.filter(sala_dm=dm, lida=False).exclude(usuario=user).count()
+        dm_unread[dm.id] = count
+
     # Buscar todas as salas (grupos) do usuário para a sidebar
     salas_publicas = Sala.objects.filter(publica=True)
     minhas_salas_privadas = Sala.objects.filter(publica=False, dono=user)
@@ -114,6 +134,12 @@ def room(request, room_name):
     ]
     salas_autorizadas = Sala.objects.filter(id__in=salas_autorizadas_ids, publica=False).exclude(dono=user)
     salas = list(salas_publicas) + list(minhas_salas_privadas) + list(salas_autorizadas)
+
+    # Contar mensagens não lidas para cada sala
+    sala_unread = {}
+    for sala in salas:
+        count = Mensagem.objects.filter(sala=sala, lida=False).exclude(usuario=user).count()
+        sala_unread[sala.id] = count
 
     # Verifica se é uma sala DM pelo formato esperado "id1_id2"
     if '_' in room_name:
@@ -138,20 +164,27 @@ def room(request, room_name):
             'mensagens': mensagens,
             'dms': dms,
             'salas': salas,
-            'other_user': other_user
+            'other_user': other_user,
+            'dm_unread': dm_unread,
+            'sala_unread': sala_unread,
         })
 
     # Caso contrário, é uma sala de grupo normal (com base no nome da sala)
     sala = get_object_or_404(Sala, nome=room_name)
 
     if sala.publica or sala.dono == user:
+        # Marcar mensagens como lidas
+        Mensagem.objects.filter(sala=sala, lida=False).exclude(usuario=user).update(lida=True)
+
         mensagens = Mensagem.objects.filter(sala=sala).order_by('timestamp')[:50]
         return render(request, 'chat/room.html', {
             'room_name': sala.nome,
             'mensagens': mensagens,
             'dms': dms,
             'salas': salas,
-            'other_user': None
+            'other_user': None,
+            'dm_unread': dm_unread,
+            'sala_unread': sala_unread,
         })
 
     if request.method == 'POST':
@@ -166,13 +199,18 @@ def room(request, room_name):
     if not autorizado:
         return render(request, 'chat/verificar_senha.html', {'sala': sala})
 
+    # Marcar mensagens como lidas
+    Mensagem.objects.filter(sala=sala, lida=False).exclude(usuario=user).update(lida=True)
+
     mensagens = Mensagem.objects.filter(sala=sala).order_by('timestamp')[:50]
     return render(request, 'chat/room.html', {
         'room_name': sala.nome,
         'mensagens': mensagens,
         'dms': dms,
         'salas': salas,
-        'other_user': None
+        'other_user': None,
+        'dm_unread': dm_unread,
+        'sala_unread': sala_unread,
     })
 
 @login_required

@@ -1,3 +1,4 @@
+{% load chat_extras %}
 <!DOCTYPE html>
 <html lang="pt-br">
 
@@ -105,6 +106,23 @@
                                         Mensagem privada
                                     </div>
                                 </div>
+                                {% if dm_unread|default_if_none:dict %}
+                                    {% with unread_count=dm_unread|get_item:dm.id %}
+                                        {% if unread_count and unread_count > 0 %}
+                                            <span id="dm-unread-{{ dm.id }}" class="badge rounded-pill" style="background: var(--lime-primary); color: var(--text-primary); font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                                                {{ unread_count }}
+                                            </span>
+                                        {% else %}
+                                            <span id="dm-unread-{{ dm.id }}" class="badge rounded-pill" style="display: none; background: var(--lime-primary); color: var(--text-primary); font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                                                0
+                                            </span>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% else %}
+                                    <span id="dm-unread-{{ dm.id }}" class="badge rounded-pill" style="display: none; background: var(--lime-primary); color: var(--text-primary); font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                                        0
+                                    </span>
+                                {% endif %}
                             </a>
                         {% endfor %}
                     {% endif %}
@@ -122,6 +140,15 @@
                                         {% if sala.publica %}Grupo público{% else %}Grupo privado{% endif %}
                                     </div>
                                 </div>
+                                {% if sala_unread|default_if_none:dict %}
+                                    {% with unread_count=sala_unread|get_item:sala.id %}
+                                        {% if unread_count and unread_count > 0 %}
+                                            <span class="badge rounded-pill" style="background: var(--lime-primary); color: var(--text-primary); font-size: 0.75rem; padding: 0.25rem 0.5rem;">
+                                                {{ unread_count }}
+                                            </span>
+                                        {% endif %}
+                                    {% endwith %}
+                                {% endif %}
                             </a>
                         {% endfor %}
                     {% endif %}
@@ -250,6 +277,66 @@
                     applyTheme(theme);
                 });
             });
+        });
+    </script>
+
+    <!-- WebSocket para notificações em tempo real -->
+    <script>
+        // WebSocket para notificações em tempo real
+        const userId = {{ user.id }};
+        const notificationSocket = new WebSocket(`ws://${window.location.host}/ws/notifications/${userId}/`);
+
+        notificationSocket.onopen = function() {
+            console.log('✅ Conectado ao sistema de notificações');
+        };
+
+        notificationSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+
+            if (data.type === "nova_dm") {
+                const badge = document.querySelector(`#dm-unread-${data.sala_id}`);
+                if (badge) {
+                    let atual = parseInt(badge.innerText || "0");
+                    badge.innerText = atual + 1;
+                    badge.style.display = "inline-block";
+
+                    // Adicionar animação de pulso
+                    badge.style.animation = 'pulse 0.5s ease';
+                }
+
+                // Notificação visual com contador de mensagens não lidas
+                if (typeof Dialogus !== 'undefined') {
+                    Dialogus.NotificationManager.show(
+                        `Nova mensagem de ${data.from_user}`,
+                        'info',
+                        3000,
+                        data.unread_count
+                    );
+                }
+
+                // Som de notificação (opcional)
+                // playNotificationSound();
+            }
+        };
+
+        notificationSocket.onerror = function(error) {
+            console.error('❌ Erro no WebSocket de notificações:', error);
+        };
+
+        notificationSocket.onclose = function(e) {
+            console.log('🔌 WebSocket de notificações fechado');
+            // Tentar reconectar após 5 segundos
+            setTimeout(() => {
+                console.log('🔄 Tentando reconectar...');
+                location.reload();
+            }, 5000);
+        };
+
+        // Limpeza ao sair da página
+        window.addEventListener('beforeunload', function() {
+            if (notificationSocket) {
+                notificationSocket.close();
+            }
         });
     </script>
 

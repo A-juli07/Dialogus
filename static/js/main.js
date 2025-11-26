@@ -86,13 +86,19 @@ class AnimationManager {
 
 // ========== NOTIFICAÇÕES ==========
 class NotificationManager {
-    static show(message, type = 'info', duration = 3000) {
+    static show(message, type = 'info', duration = 3000, badge = null) {
         const notification = document.createElement('div');
         notification.className = `notification notification-${type}`;
+
+        const badgeHtml = badge && badge > 0
+            ? `<span class="notification-badge">${badge}</span>`
+            : '';
+
         notification.innerHTML = `
             <div class="notification-content">
                 <i class="bi bi-${this.getIcon(type)}"></i>
                 <span>${message}</span>
+                ${badgeHtml}
             </div>
         `;
 
