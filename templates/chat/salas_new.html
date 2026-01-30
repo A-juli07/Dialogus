@@ -3,78 +3,86 @@
 {% block title %}Grupos - Dialogus{% endblock %}
 
 {% block sidebar_content %}
-<div class="contact-list">
-    <!-- DMs -->
-    {% if dms %}
-        <div class="px-3 py-2">
-            <small class="text-white-50 text-uppercase" style="font-size: 0.75rem; font-weight: 600;">Mensagens Diretas</small>
-        </div>
-        {% for dm in dms %}
-            <a href="{% url 'room' room_name=dm.get_nome_sala %}" class="contact-item">
-                <div class="contact-avatar">
-                    {% if dm.usuario1 == user %}
-                        {{ dm.usuario2.username|slice:":1"|upper }}
-                    {% else %}
-                        {{ dm.usuario1.username|slice:":1"|upper }}
-                    {% endif %}
-                </div>
-                <div class="contact-info">
-                    <div class="contact-name">
+{% if dms %}
+    {% for dm in dms %}
+        <a href="{% url 'room' room_name=dm.get_nome_sala %}"
+           class="wa-conversation-item"
+           data-name="{% if dm.usuario1 == user %}{{ dm.usuario2.username|lower }}{% else %}{{ dm.usuario1.username|lower }}{% endif %}">
+            <div class="wa-conv-avatar">
+                {% if dm.usuario1 == user %}
+                    {{ dm.usuario2.username|slice:":1"|upper }}
+                {% else %}
+                    {{ dm.usuario1.username|slice:":1"|upper }}
+                {% endif %}
+            </div>
+            <div class="wa-conv-content">
+                <div class="wa-conv-header">
+                    <span class="wa-conv-name">
                         {% if dm.usuario1 == user %}
                             {{ dm.usuario2.username }}
                         {% else %}
                             {{ dm.usuario1.username }}
                         {% endif %}
-                    </div>
-                    <div class="contact-preview">Mensagem privada</div>
+                    </span>
                 </div>
-            </a>
-        {% endfor %}
-    {% endif %}
+                <div class="wa-conv-preview">
+                    <span class="wa-last-msg">Mensagem privada</span>
+                </div>
+            </div>
+        </a>
+    {% endfor %}
+{% endif %}
 
-    <!-- Grupos -->
-    {% if salas %}
-        <div class="px-3 py-2 mt-3">
-            <small class="text-white-50 text-uppercase" style="font-size: 0.75rem; font-weight: 600;">Grupos</small>
-        </div>
-        {% for sala in salas %}
-            <a href="{% url 'room' room_name=sala.nome %}" class="contact-item">
-                <div class="contact-avatar">
-                    <i class="bi bi-people-fill"></i>
+{% if salas %}
+    {% for sala in salas %}
+        <a href="{% url 'room' room_name=sala.nome %}"
+           class="wa-conversation-item"
+           data-name="{{ sala.nome|lower }}">
+            <div class="wa-conv-avatar">
+                <i class="bi bi-people-fill"></i>
+            </div>
+            <div class="wa-conv-content">
+                <div class="wa-conv-header">
+                    <span class="wa-conv-name">{{ sala.nome }}</span>
                 </div>
-                <div class="contact-info">
-                    <div class="contact-name">{{ sala.nome }}</div>
-                    <div class="contact-preview">
-                        {% if sala.publica %}Grupo público{% else %}Grupo privado{% endif %}
-                    </div>
+                <div class="wa-conv-preview">
+                    <span class="wa-last-msg">{% if sala.publica %}Grupo público{% else %}Grupo privado{% endif %}</span>
                 </div>
-            </a>
-        {% endfor %}
-    {% endif %}
+            </div>
+        </a>
+    {% endfor %}
+{% endif %}
 
-    {% if not dms and not salas %}
-        <div class="text-center text-white-50 py-5 px-3">
-            <i class="bi bi-chat-dots" style="font-size: 3rem; opacity: 0.3;"></i>
-            <p class="mt-3 mb-0" style="font-size: 0.9rem;">Nenhuma conversa ainda</p>
-        </div>
-    {% endif %}
-</div>
+{% if not dms and not salas %}
+    <div class="text-center text-white-50 py-5">
+        <i class="bi bi-chat-dots" style="font-size: 3rem; opacity: 0.3;"></i>
+        <p class="mt-3">Nenhuma conversa ainda</p>
+        <a href="{% url 'enviar_convite' %}" class="btn btn-sm" style="background: var(--lime-primary); color: var(--text-primary);">
+            Iniciar Conversa
+        </a>
+    </div>
+{% endif %}
 {% endblock %}
 
 {% block chat_content %}
-<!-- Área Principal de Salas -->
-<div class="p-4" style="background: var(--bg-secondary); height: 100%; overflow-y: auto;">
-    <!-- Header -->
-    <div class="mb-4">
-        <h1 class="mb-2" style="color: var(--bg-sidebar);">
-            <i class="bi bi-people-fill me-3"></i>
-            Grupos de Chat
-        </h1>
-        <p class="text-muted mb-0">
-            <i class="bi bi-grid-3x3-gap-fill me-2"></i>
-            Explore grupos públicos ou acesse seus grupos privados
-        </p>
+<!-- Header WhatsApp-Style -->
+<div class="wa-chat-header">
+    <div class="wa-chat-avatar" style="background: var(--lime-primary); color: var(--text-primary);">
+        <i class="bi bi-people-fill"></i>
     </div>
+    <div class="wa-chat-info">
+        <h3 class="wa-chat-name">Grupos de Chat</h3>
+        <span class="wa-chat-status">Explore grupos públicos ou acesse seus grupos privados</span>
+    </div>
+    <div class="wa-chat-actions">
+        <a href="{% url 'criar_sala' %}" class="wa-icon-btn" title="Criar grupo">
+            <i class="bi bi-plus-lg"></i>
+        </a>
+    </div>
+</div>
+
+<!-- Área Principal de Salas -->
+<div class="p-4" style="background: var(--wa-chat-bg); flex: 1; overflow-y: auto;">
 
     <!-- Grupos Públicos -->
     <div class="mb-5">

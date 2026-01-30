@@ -3,204 +3,130 @@
 {% block title %}{{ room_name }} - Dialogus{% endblock %}
 
 {% block chat_content %}
-<!-- Cabeçalho do Chat -->
-<div class="chat-header">
-    <div class="contact-avatar" style="width: 45px; height: 45px;">
+<!-- Cabeçalho do Chat WhatsApp-Style -->
+<div class="wa-chat-header">
+    <!-- Botão Voltar (Mobile) -->
+    <button class="wa-back-btn" onclick="showSidebar()" title="Voltar">
+        <i class="bi bi-arrow-left"></i>
+    </button>
+
+    <!-- Avatar do Chat -->
+    <div class="wa-chat-avatar">
         {% if '_' in room_name %}
             <i class="bi bi-person-fill"></i>
         {% else %}
             <i class="bi bi-people-fill"></i>
         {% endif %}
     </div>
-    <div class="flex-grow-1">
-        <h2 class="mb-0">
+
+    <!-- Info do Chat -->
+    <div class="wa-chat-info">
+        <h3 class="wa-chat-name">
             {% if '_' in room_name %}
                 {{ other_user.username }}
             {% else %}
                 {{ room_name }}
             {% endif %}
-        </h2>
-        <small style="color: var(--text-secondary); font-size: 0.85rem;">
+        </h3>
+        <span class="wa-chat-status">
             {% if '_' in room_name %}
-                <i class="bi bi-shield-lock-fill"></i> Mensagens privadas
+                clique aqui para ver o perfil
             {% else %}
-                <i class="bi bi-people"></i> Grupo
+                clique aqui para ver detalhes do grupo
             {% endif %}
-        </small>
+        </span>
+    </div>
+
+    <!-- Ações do Chat -->
+    <div class="wa-chat-actions">
+        <button class="wa-icon-btn" title="Buscar">
+            <i class="bi bi-search"></i>
+        </button>
+        <div class="dropdown">
+            <button class="wa-icon-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Menu">
+                <i class="bi bi-three-dots-vertical"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                    <a class="dropdown-item" href="{% url 'index' %}">
+                        <i class="bi bi-house me-2"></i>
+                        Ir para Início
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="{% url 'salas' %}">
+                        <i class="bi bi-people me-2"></i>
+                        Ver Grupos
+                    </a>
+                </li>
+            </ul>
+        </div>
     </div>
 </div>
 
-    <!-- Log de Mensagens -->
-    <div id="chat-log" class="chat-log">
-        {% for msg in mensagens %}
-            <div class="chat-message {% if msg.usuario == user %}my-message{% else %}other-message{% endif %}" data-message-id="{{ msg.id }}">
-                <div class="chat-message-content">
-                    {% if msg.usuario != user %}
-                        <div class="chat-message-username">{{ msg.usuario.username }}</div>
+<!-- Log de Mensagens WhatsApp-Style -->
+<div id="chat-log" class="wa-messages-container">
+    {% for msg in mensagens %}
+        <div class="wa-message {% if msg.usuario == user %}outgoing{% else %}incoming{% endif %}" data-message-id="{{ msg.id }}">
+            <div class="wa-message-bubble">
+                {% if msg.usuario != user %}
+                    <span class="wa-message-sender">{{ msg.usuario.username }}</span>
+                {% endif %}
+                <p class="wa-message-text">{{ msg.conteudo }}</p>
+                <span class="wa-message-meta">
+                    <span class="wa-message-time">{{ msg.timestamp|date:"H:i" }}</span>
+                    {% if msg.usuario == user %}
+                        <i class="bi bi-check2-all wa-read-receipt"></i>
                     {% endif %}
-                    <div class="chat-message-text">{{ msg.conteudo }}</div>
-                    <div class="chat-message-time">
-                        <small>{{ msg.timestamp|date:"H:i" }}</small>
-                        {% if msg.usuario == user %}
-                            <i class="bi bi-check2-all ms-1"></i>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        {% empty %}
-            <div class="text-center text-muted py-5">
-                <i class="bi bi-chat-dots" style="font-size: 3rem; opacity: 0.3;"></i>
-                <p class="mt-3">Nenhuma mensagem ainda. Seja o primeiro a enviar!</p>
-            </div>
-        {% endfor %}
-    </div>
-
-    <!-- Container de Input -->
-    <div class="chat-input-container">
-        <div class="chat-input-group">
-            <!-- Botão de Emoji (futuro) -->
-            <button class="btn btn-light rounded-circle" type="button" style="width: 45px; height: 45px;" title="Emojis" disabled>
-                <i class="bi bi-emoji-smile"></i>
-            </button>
-
-            <!-- Input de Mensagem -->
-            <input
-                id="chat-message-input"
-                type="text"
-                class="chat-input"
-                placeholder="Digite sua mensagem..."
-                autocomplete="off"
-                maxlength="5000"
-            >
-
-            <!-- Botão Enviar -->
-            <button id="chat-message-submit" class="chat-send-btn" type="button">
-                <i class="bi bi-send-fill"></i>
-                <span class="d-none d-sm-inline ms-2">Enviar</span>
-            </button>
-        </div>
-
-        <!-- Indicador de digitação (futuro) -->
-        <div id="typing-indicator" class="typing-indicator" style="display: none;">
-            <small class="text-muted">
-                <span class="typing-dots">
-                    <span></span>
-                    <span></span>
-                    <span></span>
                 </span>
-                Alguém está digitando...
-            </small>
+            </div>
         </div>
+    {% empty %}
+        <div class="wa-empty-chat">
+            <i class="bi bi-chat-dots"></i>
+            <p>Nenhuma mensagem ainda.<br>Seja o primeiro a enviar!</p>
+        </div>
+    {% endfor %}
+</div>
+
+<!-- Container de Input WhatsApp-Style -->
+<div class="wa-input-container">
+    <!-- Botão de Emoji -->
+    <button class="wa-input-icon-btn" type="button" title="Emojis" disabled>
+        <i class="bi bi-emoji-smile"></i>
+    </button>
+
+    <!-- Botão de Anexo -->
+    <button class="wa-input-icon-btn" type="button" title="Anexar" disabled>
+        <i class="bi bi-paperclip"></i>
+    </button>
+
+    <!-- Input de Mensagem -->
+    <div class="wa-text-input-wrapper">
+        <input
+            id="chat-message-input"
+            type="text"
+            placeholder="Mensagem"
+            autocomplete="off"
+            maxlength="5000"
+        >
     </div>
+
+    <!-- Botão Enviar -->
+    <button id="chat-message-submit" class="wa-send-btn" type="button" title="Enviar">
+        <i class="bi bi-send-fill"></i>
+    </button>
 </div>
 {% endblock %}
 
 <style>
-    /* Indicador de digitação */
-    .typing-indicator {
-        padding: 0.5rem 0;
-        margin-top: 0.5rem;
-    }
-
-    .typing-dots {
-        display: inline-flex;
-        gap: 4px;
-        margin-right: 8px;
-    }
-
-    .typing-dots span {
-        width: 6px;
-        height: 6px;
-        background-color: var(--text-secondary);
-        border-radius: 50%;
-        display: inline-block;
-        animation: typing 1.4s infinite;
-    }
-
-    .typing-dots span:nth-child(2) {
-        animation-delay: 0.2s;
-    }
-
-    .typing-dots span:nth-child(3) {
-        animation-delay: 0.4s;
-    }
-
-    @keyframes typing {
-        0%, 60%, 100% {
-            transform: translateY(0);
-            opacity: 0.7;
-        }
-        30% {
-            transform: translateY(-10px);
-            opacity: 1;
-        }
-    }
-
-    /* Ajustes para mensagens vazias */
-    .chat-log:empty::after {
+    /* Estilos adicionais específicos desta página */
+    .wa-messages-container:empty::after {
         content: 'Carregando mensagens...';
         display: block;
         text-align: center;
         color: var(--text-secondary);
         padding: 2rem;
-    }
-
-    /* Animação para novas mensagens */
-    @keyframes newMessage {
-        from {
-            opacity: 0;
-            transform: scale(0.8) translateY(20px);
-        }
-        to {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-        }
-    }
-
-    .chat-message.new-message {
-        animation: newMessage 0.3s ease;
-    }
-
-    /* Status de leitura */
-    .chat-message-time i.bi-check2-all {
-        color: #34b7f1;
-    }
-
-    /* Scrollbar customizada */
-    .chat-log::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    .chat-log::-webkit-scrollbar-track {
-        background: var(--bg-secondary);
-    }
-
-    .chat-log::-webkit-scrollbar-thumb {
-        background: var(--accent-primary);
-        border-radius: 3px;
-    }
-
-    .chat-log::-webkit-scrollbar-thumb:hover {
-        background: var(--accent-secondary);
-    }
-
-    /* Responsividade */
-    @media (max-width: 768px) {
-        .chat-container {
-            padding: 0;
-        }
-
-        .chat-header {
-            border-radius: 0;
-        }
-
-        .chat-input-container {
-            border-radius: 0;
-        }
-
-        .chat-log {
-            height: calc(100vh - 250px);
-        }
     }
 </style>
 
@@ -263,44 +189,41 @@
     // Conectar ao WebSocket
     connectWebSocket();
 
-    // Função para adicionar mensagem ao chat
+    // Função para adicionar mensagem ao chat (WhatsApp-style)
     function addMessage(username, message, isOwn) {
-        const messageClass = isOwn ? 'my-message' : 'other-message';
+        // Remover estado vazio se existir
+        const emptyState = chatLog.querySelector('.wa-empty-chat');
+        if (emptyState) {
+            emptyState.remove();
+        }
+
+        const messageClass = isOwn ? 'outgoing' : 'incoming';
         const now = new Date();
         const timeString = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
         const messageElement = document.createElement('div');
-        messageElement.className = `chat-message ${messageClass} new-message`;
+        messageElement.className = `wa-message ${messageClass}`;
 
-        let messageHTML = '<div class="chat-message-content">';
+        let messageHTML = '<div class="wa-message-bubble">';
 
         // Adicionar nome do usuário se não for própria mensagem
         if (!isOwn) {
-            messageHTML += `<div class="chat-message-username">${escapeHtml(username)}</div>`;
+            messageHTML += `<span class="wa-message-sender">${escapeHtml(username)}</span>`;
         }
 
         messageHTML += `
-            <div class="chat-message-text">${escapeHtml(message)}</div>
-            <div class="chat-message-time">
-                <small>${timeString}</small>
-                ${isOwn ? '<i class="bi bi-check2-all ms-1"></i>' : ''}
-            </div>
+            <p class="wa-message-text">${escapeHtml(message)}</p>
+            <span class="wa-message-meta">
+                <span class="wa-message-time">${timeString}</span>
+                ${isOwn ? '<i class="bi bi-check2-all wa-read-receipt"></i>' : ''}
+            </span>
         </div>`;
 
         messageElement.innerHTML = messageHTML;
         chatLog.appendChild(messageElement);
 
         // Scroll suave para o final
-        if (typeof Dialogus !== 'undefined') {
-            Dialogus.ChatUtils.scrollToBottom(chatLog);
-        } else {
-            chatLog.scrollTop = chatLog.scrollHeight;
-        }
-
-        // Remover classe de animação após completar
-        setTimeout(() => {
-            messageElement.classList.remove('new-message');
-        }, 300);
+        chatLog.scrollTop = chatLog.scrollHeight;
     }
 
     // Função para enviar mensagem

@@ -38,23 +38,27 @@
 <body>
     <!-- Container Principal com Layout de 2 Colunas -->
     <div class="chat-container">
-        <!-- Barra Lateral de Conversas -->
-        <div class="chat-sidebar">
-            <!-- Header da Sidebar com Logo e Dropdown -->
-            <div class="chat-sidebar-header">
-                <div class="d-flex align-items-center justify-content-between w-100">
-                    <div class="d-flex align-items-center gap-2">
-                        <div class="chat-sidebar-logo">
-                            <i class="bi bi-chat-dots-fill"></i>
-                        </div>
-                        <h1 class="chat-sidebar-title mb-0">Chat</h1>
-                    </div>
-                    <!-- Dropdown de Ações Rápidas -->
+        <!-- Barra Lateral WhatsApp-Style -->
+        <div class="wa-sidebar" id="sidebar">
+            <!-- Header do Usuário -->
+            <div class="wa-sidebar-header">
+                <div class="wa-user-info">
+                    <a href="{% url 'perfil' %}" class="wa-user-avatar" title="Editar perfil">
+                        {{ user.username|slice:":1"|upper }}
+                    </a>
+                    <span class="wa-user-name">{{ user.username }}</span>
+                </div>
+                <div class="wa-header-actions">
+                    <!-- Botão Novo Chat -->
+                    <a href="{% url 'enviar_convite' %}" class="wa-icon-btn" title="Nova conversa">
+                        <i class="bi bi-chat-plus"></i>
+                    </a>
+                    <!-- Dropdown Menu -->
                     <div class="dropdown">
-                        <button class="btn btn-sm dropdown-toggle" style="background: var(--lime-primary); color: var(--text-primary); border: none;" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-plus-lg"></i>
+                        <button class="wa-icon-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Menu">
+                            <i class="bi bi-three-dots-vertical"></i>
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+                        <ul class="dropdown-menu dropdown-menu-end">
                             <li>
                                 <a class="dropdown-item" href="{% url 'criar_sala' %}">
                                     <i class="bi bi-people-fill me-2"></i>
@@ -62,172 +66,148 @@
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="{% url 'enviar_convite' %}">
-                                    <i class="bi bi-envelope-plus-fill me-2"></i>
-                                    Enviar Convite
-                                </a>
-                            </li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li>
                                 <a class="dropdown-item" href="{% url 'convites' %}">
                                     <i class="bi bi-inbox-fill me-2"></i>
                                     Ver Convites
                                 </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{% url 'perfil' %}">
+                                    <i class="bi bi-person-circle me-2"></i>
+                                    Meu Perfil
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="#" onclick="toggleTheme()">
+                                    <i class="bi bi-circle-half me-2"></i>
+                                    Alternar Tema
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <form method="post" action="{% url 'logout' %}" class="m-0">
+                                    {% csrf_token %}
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="bi bi-box-arrow-right me-2"></i>
+                                        Sair
+                                    </button>
+                                </form>
                             </li>
                         </ul>
                     </div>
                 </div>
             </div>
 
+            <!-- Barra de Busca -->
+            <div class="wa-search-container">
+                <div class="wa-search-box">
+                    <i class="bi bi-search"></i>
+                    <input type="text" id="search-conversations" placeholder="Pesquisar ou iniciar nova conversa" autocomplete="off">
+                </div>
+            </div>
+
             <!-- Lista de Conversas -->
-            <div class="chat-conversations-list">
+            <div class="wa-conversations" id="conversations-list">
                 {% block sidebar_content %}
-                <div class="contact-list">
-                    {% if dms %}
-                        {% for dm in dms %}
-                            <a href="{% url 'room' room_name=dm.get_nome_sala %}"
-                               class="contact-item {% if room_name == dm.get_nome_sala %}active{% endif %}">
-                                <div class="contact-avatar">
-                                    {% if dm.usuario1 == user %}
-                                        {{ dm.usuario2.username|slice:":1"|upper }}
-                                    {% else %}
-                                        {{ dm.usuario1.username|slice:":1"|upper }}
-                                    {% endif %}
-                                </div>
-                                <div class="contact-info">
-                                    <div class="contact-name">
+                {% if dms %}
+                    {% for dm in dms %}
+                        <a href="{% url 'room' room_name=dm.get_nome_sala %}"
+                           class="wa-conversation-item {% if room_name == dm.get_nome_sala %}active{% endif %}"
+                           data-name="{% if dm.usuario1 == user %}{{ dm.usuario2.username|lower }}{% else %}{{ dm.usuario1.username|lower }}{% endif %}">
+                            <div class="wa-conv-avatar">
+                                {% if dm.usuario1 == user %}
+                                    {{ dm.usuario2.username|slice:":1"|upper }}
+                                {% else %}
+                                    {{ dm.usuario1.username|slice:":1"|upper }}
+                                {% endif %}
+                            </div>
+                            <div class="wa-conv-content">
+                                <div class="wa-conv-header">
+                                    <span class="wa-conv-name">
                                         {% if dm.usuario1 == user %}
                                             {{ dm.usuario2.username }}
                                         {% else %}
                                             {{ dm.usuario1.username }}
                                         {% endif %}
-                                    </div>
-                                    <div class="contact-preview">
-                                        Mensagem privada
-                                    </div>
-                                </div>
-                                {% if dm_unread|default_if_none:dict %}
-                                    {% with unread_count=dm_unread|get_item:dm.id %}
-                                        {% if unread_count and unread_count > 0 %}
-                                            <span id="dm-unread-{{ dm.id }}" class="badge rounded-pill" style="background: var(--lime-primary); color: var(--text-primary); font-size: 0.75rem; padding: 0.25rem 0.5rem;">
-                                                {{ unread_count }}
-                                            </span>
-                                        {% else %}
-                                            <span id="dm-unread-{{ dm.id }}" class="badge rounded-pill" style="display: none; background: var(--lime-primary); color: var(--text-primary); font-size: 0.75rem; padding: 0.25rem 0.5rem;">
-                                                0
-                                            </span>
-                                        {% endif %}
-                                    {% endwith %}
-                                {% else %}
-                                    <span id="dm-unread-{{ dm.id }}" class="badge rounded-pill" style="display: none; background: var(--lime-primary); color: var(--text-primary); font-size: 0.75rem; padding: 0.25rem 0.5rem;">
-                                        0
                                     </span>
-                                {% endif %}
-                            </a>
-                        {% endfor %}
-                    {% endif %}
-
-                    {% if salas %}
-                        {% for sala in salas %}
-                            <a href="{% url 'room' room_name=sala.nome %}"
-                               class="contact-item {% if room_name == sala.nome %}active{% endif %}">
-                                <div class="contact-avatar">
-                                    <i class="bi bi-people-fill"></i>
                                 </div>
-                                <div class="contact-info">
-                                    <div class="contact-name">{{ sala.nome }}</div>
-                                    <div class="contact-preview">
-                                        {% if sala.publica %}Grupo público{% else %}Grupo privado{% endif %}
-                                    </div>
+                                <div class="wa-conv-preview">
+                                    <span class="wa-last-msg">Mensagem privada</span>
+                                    {% if dm_unread|default_if_none:dict %}
+                                        {% with unread_count=dm_unread|get_item:dm.id %}
+                                            {% if unread_count and unread_count > 0 %}
+                                                <span id="dm-unread-{{ dm.id }}" class="wa-unread-badge">{{ unread_count }}</span>
+                                            {% else %}
+                                                <span id="dm-unread-{{ dm.id }}" class="wa-unread-badge" style="display: none;">0</span>
+                                            {% endif %}
+                                        {% endwith %}
+                                    {% else %}
+                                        <span id="dm-unread-{{ dm.id }}" class="wa-unread-badge" style="display: none;">0</span>
+                                    {% endif %}
                                 </div>
-                                {% if sala_unread|default_if_none:dict %}
-                                    {% with unread_count=sala_unread|get_item:sala.id %}
-                                        {% if unread_count and unread_count > 0 %}
-                                            <span class="badge rounded-pill" style="background: var(--lime-primary); color: var(--text-primary); font-size: 0.75rem; padding: 0.25rem 0.5rem;">
-                                                {{ unread_count }}
-                                            </span>
-                                        {% endif %}
-                                    {% endwith %}
-                                {% endif %}
-                            </a>
-                        {% endfor %}
-                    {% endif %}
+                            </div>
+                        </a>
+                    {% endfor %}
+                {% endif %}
 
-                    {% if not dms and not salas %}
-                        <div class="text-center text-white-50 py-5">
-                            <i class="bi bi-chat-dots" style="font-size: 3rem; opacity: 0.3;"></i>
-                            <p class="mt-3">Nenhuma conversa ainda</p>
-                            <a href="{% url 'index' %}" class="btn btn-sm" style="background: var(--lime-primary); color: var(--text-primary);">
-                                Ir para Início
-                            </a>
-                        </div>
-                    {% endif %}
-                </div>
+                {% if salas %}
+                    {% for sala in salas %}
+                        <a href="{% url 'room' room_name=sala.nome %}"
+                           class="wa-conversation-item {% if room_name == sala.nome %}active{% endif %}"
+                           data-name="{{ sala.nome|lower }}">
+                            <div class="wa-conv-avatar">
+                                <i class="bi bi-people-fill"></i>
+                            </div>
+                            <div class="wa-conv-content">
+                                <div class="wa-conv-header">
+                                    <span class="wa-conv-name">{{ sala.nome }}</span>
+                                </div>
+                                <div class="wa-conv-preview">
+                                    <span class="wa-last-msg">{% if sala.publica %}Grupo público{% else %}Grupo privado{% endif %}</span>
+                                    {% if sala_unread|default_if_none:dict %}
+                                        {% with unread_count=sala_unread|get_item:sala.id %}
+                                            {% if unread_count and unread_count > 0 %}
+                                                <span class="wa-unread-badge">{{ unread_count }}</span>
+                                            {% endif %}
+                                        {% endwith %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </a>
+                    {% endfor %}
+                {% endif %}
+
+                {% if not dms and not salas %}
+                    <div class="text-center text-white-50 py-5">
+                        <i class="bi bi-chat-dots" style="font-size: 3rem; opacity: 0.3;"></i>
+                        <p class="mt-3">Nenhuma conversa ainda</p>
+                        <a href="{% url 'enviar_convite' %}" class="btn btn-sm" style="background: var(--lime-primary); color: var(--text-primary);">
+                            Iniciar Conversa
+                        </a>
+                    </div>
+                {% endif %}
                 {% endblock %}
             </div>
 
-            <!-- Footer da Sidebar com Perfil e Configurações -->
-            <div style="border-top: 1px solid rgba(255,255,255,0.1); background: var(--bg-sidebar-dark);">
-                <!-- Configurações -->
-                <div class="p-3">
-                    <div class="d-grid gap-2">
-                        <!-- Seletor de Tema -->
-                        <div class="theme-selector-container">
-                            <label class="text-white-50 mb-2" style="font-size: 0.75rem; text-transform: uppercase; font-weight: 600;">
-                                <i class="bi bi-palette me-1"></i>
-                                Tema
-                            </label>
-                            <div class="btn-group w-100" role="group" aria-label="Seletor de tema">
-                                <button type="button" class="btn btn-sm theme-btn" data-theme="light" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2);">
-                                    <i class="bi bi-sun-fill me-1"></i>
-                                    Claro
-                                </button>
-                                <button type="button" class="btn btn-sm theme-btn active" data-theme="dark" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.2);">
-                                    <i class="bi bi-moon-fill me-1"></i>
-                                    Escuro
-                                </button>
-                            </div>
-                        </div>
-
-                        <hr style="border-color: rgba(255,255,255,0.1); margin: 0.5rem 0;">
-
-                        <a href="{% url 'perfil' %}" class="btn btn-sm text-white" style="background: rgba(255,255,255,0.1); text-align: left;">
-                            <i class="bi bi-person-circle me-2"></i>
-                            Editar Perfil
-                        </a>
-                        <a href="{% url 'convites' %}" class="btn btn-sm text-white" style="background: rgba(255,255,255,0.1); text-align: left;">
-                            <i class="bi bi-inbox-fill me-2"></i>
-                            Ver Convites
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Perfil do Usuário -->
-                <div class="p-3 pt-2">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="contact-avatar" style="width: 40px; height: 40px; margin-right: 0;">
-                                {{ user.username|slice:":1"|upper }}
-                            </div>
-                            <div>
-                                <div class="contact-name" style="font-size: 0.9rem; margin-bottom: 0;">{{ user.username }}</div>
-                                <div class="contact-preview" style="font-size: 0.75rem;">ID: {{ user.id }}</div>
-                            </div>
-                        </div>
-                        <!-- Botão Sair -->
-                        <form method="post" action="{% url 'logout' %}" class="m-0">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-sm" style="background: rgba(255,255,255,0.1); color: white;" title="Sair">
-                                <i class="bi bi-box-arrow-right"></i>
-                            </button>
-                        </form>
-                    </div>
+            <!-- Footer da Sidebar -->
+            <div class="wa-sidebar-footer">
+                <div class="wa-footer-actions">
+                    <a href="{% url 'index' %}" class="wa-icon-btn" title="Início">
+                        <i class="bi bi-house"></i>
+                    </a>
+                    <a href="{% url 'salas' %}" class="wa-icon-btn" title="Grupos">
+                        <i class="bi bi-people"></i>
+                    </a>
+                    <button class="wa-icon-btn theme-toggle-btn" onclick="toggleTheme()" title="Alternar tema">
+                        <i class="bi bi-circle-half"></i>
+                    </button>
                 </div>
             </div>
         </div>
 
         <!-- Área Principal do Chat -->
-        <div class="chat-main">
+        <div class="wa-chat-main">
             {% block chat_content %}
             <!-- Conteúdo do chat será inserido aqui -->
             {% endblock %}
@@ -249,20 +229,14 @@
             } else {
                 document.documentElement.removeAttribute('data-theme');
             }
-
-            // Atualizar botões ativos
-            document.querySelectorAll('.theme-btn').forEach(btn => {
-                if (btn.getAttribute('data-theme') === theme) {
-                    btn.classList.add('active');
-                    btn.style.background = 'rgba(255,255,255,0.2)';
-                } else {
-                    btn.classList.remove('active');
-                    btn.style.background = 'rgba(255,255,255,0.1)';
-                }
-            });
-
-            // Salvar preferência
             localStorage.setItem('dialogus-theme', theme);
+        }
+
+        // Função para alternar tema
+        function toggleTheme() {
+            const currentTheme = localStorage.getItem('dialogus-theme') || 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            applyTheme(newTheme);
         }
 
         // Carregar tema salvo ao iniciar
@@ -270,14 +244,36 @@
             const savedTheme = localStorage.getItem('dialogus-theme') || 'light';
             applyTheme(savedTheme);
 
-            // Event listeners para os botões de tema
-            document.querySelectorAll('.theme-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const theme = this.getAttribute('data-theme');
-                    applyTheme(theme);
+            // Busca de conversas
+            const searchInput = document.getElementById('search-conversations');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    const query = this.value.toLowerCase();
+                    document.querySelectorAll('.wa-conversation-item').forEach(item => {
+                        const name = item.getAttribute('data-name') || '';
+                        if (name.includes(query)) {
+                            item.style.display = 'flex';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
                 });
-            });
+            }
+
+            // Mobile: esconder sidebar ao clicar em conversa
+            if (window.innerWidth <= 768) {
+                document.querySelectorAll('.wa-conversation-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        document.getElementById('sidebar').classList.add('hidden');
+                    });
+                });
+            }
         });
+
+        // Função para mostrar sidebar (mobile)
+        function showSidebar() {
+            document.getElementById('sidebar').classList.remove('hidden');
+        }
     </script>
 
     <!-- WebSocket para notificações em tempo real -->
