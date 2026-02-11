@@ -53,54 +53,56 @@
     <div class="profile-hero">
         <div class="profile-hero-bg"></div>
         <div class="profile-hero-content">
-            <div class="profile-avatar-wrapper">
-                {% if perfil.foto_perfil %}
-                    <img src="{{ perfil.foto_perfil.url }}" class="profile-avatar-large" alt="Foto de Perfil">
-                {% else %}
-                    <div class="profile-avatar-large profile-avatar-placeholder">
-                        {{ user.username|slice:":1"|upper }}
+            <div class="profile-hero-left">
+                <div class="profile-avatar-wrapper">
+                    {% if perfil.foto_perfil %}
+                        <img src="{{ perfil.foto_perfil.url }}" class="profile-avatar-large" alt="Foto de Perfil">
+                    {% else %}
+                        <div class="profile-avatar-large profile-avatar-placeholder">
+                            {{ user.username|slice:":1"|upper }}
+                        </div>
+                    {% endif %}
+                    <div class="profile-avatar-badge">
+                        <i class="bi bi-camera-fill"></i>
                     </div>
-                {% endif %}
-                <div class="profile-avatar-badge">
-                    <i class="bi bi-camera-fill"></i>
+                </div>
+                <div class="profile-user-info">
+                    <h1 class="profile-username">{{ user.username }}</h1>
+                    {% if perfil.status %}
+                        <p class="profile-status-text">
+                            <i class="bi bi-chat-quote-fill"></i> {{ perfil.status }}
+                        </p>
+                    {% else %}
+                        <p class="profile-status-text profile-status-empty">
+                            <i class="bi bi-plus-circle"></i> Adicione um status
+                        </p>
+                    {% endif %}
                 </div>
             </div>
-            <h1 class="profile-username">{{ user.username }}</h1>
-            {% if perfil.status %}
-                <p class="profile-status-text">
-                    <i class="bi bi-chat-quote-fill"></i> {{ perfil.status }}
-                </p>
-            {% else %}
-                <p class="profile-status-text profile-status-empty">
-                    <i class="bi bi-plus-circle"></i> Adicione um status
-                </p>
-            {% endif %}
+            <div class="profile-hero-right">
+                <div class="profile-meta-item">
+                    <div class="meta-icon" style="background: linear-gradient(135deg, var(--bg-sidebar), var(--bg-sidebar-dark));">
+                        <i class="bi bi-person-badge-fill"></i>
+                    </div>
+                    <div class="meta-info">
+                        <span class="meta-label">ID do Usuário</span>
+                        <span class="meta-value">#{{ user.id }}</span>
+                    </div>
+                </div>
+                <div class="profile-meta-item">
+                    <div class="meta-icon" style="background: linear-gradient(135deg, var(--lime-primary), var(--lime-secondary));">
+                        <i class="bi bi-calendar-check-fill"></i>
+                    </div>
+                    <div class="meta-info">
+                        <span class="meta-label">Membro desde</span>
+                        <span class="meta-value">{{ user.date_joined|date:"d/m/Y" }}</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <div class="profile-content">
-        <!-- Cards de Informações -->
-        <div class="profile-stats">
-            <div class="stat-card">
-                <div class="stat-icon" style="background: linear-gradient(135deg, var(--bg-sidebar), var(--bg-sidebar-dark));">
-                    <i class="bi bi-person-badge-fill"></i>
-                </div>
-                <div class="stat-info">
-                    <span class="stat-label">ID do Usuário</span>
-                    <span class="stat-value">#{{ user.id }}</span>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon" style="background: linear-gradient(135deg, var(--lime-primary), var(--lime-secondary));">
-                    <i class="bi bi-calendar-check-fill"></i>
-                </div>
-                <div class="stat-info">
-                    <span class="stat-label">Membro desde</span>
-                    <span class="stat-value">{{ user.date_joined|date:"d/m/Y" }}</span>
-                </div>
-            </div>
-        </div>
-
         <!-- Formulário de Edição -->
         <div class="profile-edit-card">
             <div class="edit-card-header">
@@ -201,8 +203,7 @@
 /* Hero Section */
 .profile-hero {
     position: relative;
-    padding: 3rem 2rem 5rem;
-    text-align: center;
+    padding: 2.5rem 2rem;
     overflow: hidden;
 }
 
@@ -212,8 +213,6 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: var(--bg-sidebar);
-    clip-path: ellipse(80% 100% at 50% 0%);
 }
 
 .profile-hero-bg::before {
@@ -223,8 +222,6 @@
     left: -50%;
     width: 200%;
     height: 200%;
-    background: radial-gradient(circle, rgba(200, 232, 67, 0.1) 0%, transparent 50%);
-    animation: pulse-hero 8s ease-in-out infinite;
 }
 
 @keyframes pulse-hero {
@@ -235,20 +232,31 @@
 .profile-hero-content {
     position: relative;
     z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 900px;
+    margin: 0 auto;
+    gap: 2rem;
+}
+
+.profile-hero-left {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
 }
 
 .profile-avatar-wrapper {
     position: relative;
-    display: inline-block;
-    margin-bottom: 1.5rem;
+    flex-shrink: 0;
 }
 
 .profile-avatar-large {
-    width: 140px;
-    height: 140px;
+    width: 110px;
+    height: 110px;
     border-radius: 50%;
-    border: 5px solid var(--lime-primary);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    border: 4px solid var(--lime-primary);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
     object-fit: cover;
 }
 
@@ -258,40 +266,45 @@
     justify-content: center;
     background: linear-gradient(135deg, var(--lime-primary), var(--lime-secondary));
     color: var(--bg-sidebar);
-    font-size: 4rem;
+    font-size: 3rem;
     font-weight: 700;
 }
 
 .profile-avatar-badge {
     position: absolute;
-    bottom: 8px;
-    right: 8px;
-    width: 40px;
-    height: 40px;
+    bottom: 4px;
+    right: 4px;
+    width: 34px;
+    height: 34px;
     background: var(--lime-primary);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--bg-sidebar);
-    font-size: 1.1rem;
+    font-size: 1rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.profile-user-info {
+    display: flex;
+    flex-direction: column;
 }
 
 .profile-username {
     color: white;
-    font-size: 2rem;
+    font-size: 1.75rem;
     font-weight: 700;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
 }
 
 .profile-status-text {
     color: rgba(255, 255, 255, 0.9);
-    font-size: 1rem;
+    font-size: 0.95rem;
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 0.5rem;
+    margin: 0;
 }
 
 .profile-status-text i {
@@ -302,66 +315,60 @@
     opacity: 0.7;
 }
 
-/* Content Section */
-.profile-content {
-    max-width: 900px;
-    margin: -2rem auto 0;
-    padding: 0 1.5rem 3rem;
-    position: relative;
-    z-index: 2;
+/* Right side - Meta info */
+.profile-hero-right {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
 }
 
-/* Stats Cards */
-.profile-stats {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-    margin-bottom: 2rem;
-}
-
-.stat-card {
-    background: var(--card-bg);
-    border-radius: 16px;
-    padding: 1.5rem;
+.profile-meta-item {
     display: flex;
     align-items: center;
-    gap: 1rem;
-    box-shadow: var(--shadow-md);
-    border: 1px solid var(--border-color);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    gap: 0.75rem;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.75rem 1.25rem;
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
 }
 
-.stat-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
-}
-
-.stat-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 14px;
+.meta-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
+    font-size: 1.1rem;
     color: white;
+    flex-shrink: 0;
 }
 
-.stat-info {
+.meta-info {
     display: flex;
     flex-direction: column;
 }
 
-.stat-label {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    margin-bottom: 0.25rem;
+.meta-label {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.stat-value {
-    font-size: 1.25rem;
+.meta-value {
+    font-size: 1rem;
     font-weight: 700;
-    color: var(--text-primary);
+    color: white;
+}
+
+/* Content Section */
+.profile-content {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 3rem;
+    position: relative;
+    z-index: 2;
 }
 
 /* Edit Card */
@@ -598,24 +605,50 @@ textarea.form-control-modern {
 /* Responsivo */
 @media (max-width: 768px) {
     .profile-hero {
-        padding: 2rem 1rem 4rem;
+        padding: 2rem 1rem;
+    }
+
+    .profile-hero-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .profile-hero-left {
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        text-align: center;
+    }
+
+    .profile-user-info {
+        align-items: center;
+    }
+
+    .profile-status-text {
+        justify-content: center;
     }
 
     .profile-avatar-large {
-        width: 110px;
-        height: 110px;
+        width: 90px;
+        height: 90px;
     }
 
     .profile-avatar-placeholder {
-        font-size: 3rem;
+        font-size: 2.5rem;
     }
 
     .profile-username {
-        font-size: 1.5rem;
+        font-size: 1.4rem;
     }
 
-    .profile-stats {
-        grid-template-columns: 1fr;
+    .profile-hero-right {
+        width: 100%;
+        flex-direction: row;
+    }
+
+    .profile-meta-item {
+        flex: 1;
+        padding: 0.625rem 1rem;
     }
 
     .profile-form {
@@ -634,20 +667,10 @@ textarea.form-control-modern {
     .btn-cancel {
         order: 2;
     }
-
-    .profile-tips {
-        grid-template-columns: 1fr;
-    }
 }
 
 /* Tema escuro */
 [data-theme="dark"] .profile-edit-card {
-    background: var(--bg-secondary);
-    border-color: var(--bg-tertiary);
-}
-
-[data-theme="dark"] .stat-card,
-[data-theme="dark"] .tip-card {
     background: var(--bg-secondary);
     border-color: var(--bg-tertiary);
 }
@@ -665,10 +688,6 @@ textarea.form-control-modern {
 [data-theme="dark"] .form-control-modern:focus {
     background: var(--bg-secondary);
     border-color: var(--lime-primary);
-}
-
-[data-theme="dark"] .tip-icon {
-    background: var(--bg-tertiary);
 }
 </style>
 
