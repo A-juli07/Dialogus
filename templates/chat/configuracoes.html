@@ -1,0 +1,1411 @@
+{% extends 'chat/base.html' %}
+
+{% block title %}Configurações - Dialogus{% endblock %}
+
+{% block sidebar_title %}Configurações{% endblock %}
+
+{% block sidebar_content %}
+<!-- Menu de Configurações na Sidebar -->
+<a href="{% url 'perfil' %}" class="conversation-item" data-name="perfil">
+    <div class="conversation-avatar">
+        {% if perfil.foto_perfil %}
+            <img src="{{ perfil.foto_perfil.url }}" alt="Foto">
+        {% else %}
+            {{ user.username|slice:":1"|upper }}
+        {% endif %}
+    </div>
+    <div class="conversation-info">
+        <div class="conversation-name">{{ user.username }}</div>
+        <div class="conversation-preview">{% if perfil.status %}{{ perfil.status }}{% else %}Disponível{% endif %}</div>
+    </div>
+</a>
+
+<div style="padding: 0.5rem 1rem; color: rgba(255,255,255,0.5); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">
+    Configurações
+</div>
+
+<div class="conversation-item" data-section="conta" onclick="showSection('conta')" style="cursor: pointer;">
+    <div class="conversation-avatar group" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+        <i class="bi bi-key-fill"></i>
+    </div>
+    <div class="conversation-info">
+        <div class="conversation-name">Conta</div>
+        <div class="conversation-preview">Segurança, alterar senha</div>
+    </div>
+</div>
+
+<div class="conversation-item" data-section="privacidade" onclick="showSection('privacidade')" style="cursor: pointer;">
+    <div class="conversation-avatar group" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
+        <i class="bi bi-lock-fill"></i>
+    </div>
+    <div class="conversation-info">
+        <div class="conversation-name">Privacidade</div>
+        <div class="conversation-preview">Contatos bloqueados</div>
+    </div>
+</div>
+
+<div class="conversation-item active" data-section="conversas" onclick="showSection('conversas')" style="cursor: pointer;">
+    <div class="conversation-avatar group" style="background: linear-gradient(135deg, var(--lime-primary), var(--lime-secondary));">
+        <i class="bi bi-chat-dots-fill"></i>
+    </div>
+    <div class="conversation-info">
+        <div class="conversation-name">Conversas</div>
+        <div class="conversation-preview">Tema, papel de parede</div>
+    </div>
+</div>
+
+<div class="conversation-item" data-section="notificacoes" onclick="showSection('notificacoes')" style="cursor: pointer;">
+    <div class="conversation-avatar group" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+        <i class="bi bi-bell-fill"></i>
+    </div>
+    <div class="conversation-info">
+        <div class="conversation-name">Notificações</div>
+        <div class="conversation-preview">Sons, alertas</div>
+    </div>
+</div>
+
+<div class="conversation-item" data-section="ajuda" onclick="showSection('ajuda')" style="cursor: pointer;">
+    <div class="conversation-avatar group" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+        <i class="bi bi-question-circle-fill"></i>
+    </div>
+    <div class="conversation-info">
+        <div class="conversation-name">Ajuda</div>
+        <div class="conversation-preview">Central de ajuda</div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="settings-page fade-in">
+    <!-- Conteúdo das Configurações -->
+    <div class="settings-content-main">
+            <!-- Seção Conta -->
+            <div class="settings-section" id="section-conta" style="display: none;">
+                <div class="section-header">
+                    <i class="bi bi-key-fill"></i>
+                    <h2>Conta</h2>
+                </div>
+
+                <div class="settings-card">
+                    <h3>Informações da Conta</h3>
+
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <span class="setting-label">Nome de usuário</span>
+                            <span class="setting-value">{{ user.username }}</span>
+                        </div>
+                        <button class="btn-setting" disabled>
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                    </div>
+
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <span class="setting-label">Email</span>
+                            <span class="setting-value">{% if user.email %}{{ user.email }}{% else %}Não definido{% endif %}</span>
+                        </div>
+                        <button class="btn-setting">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                    </div>
+
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <span class="setting-label">Membro desde</span>
+                            <span class="setting-value">{{ user.date_joined|date:"d/m/Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <h3>Segurança</h3>
+
+                    <div class="setting-row clickable" onclick="openModal('modalSenha')">
+                        <div class="setting-info">
+                            <span class="setting-label">Alterar senha</span>
+                            <span class="setting-desc">Atualize sua senha de acesso</span>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </div>
+
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <span class="setting-label">Verificação em duas etapas</span>
+                            <span class="setting-desc">Adicione uma camada extra de segurança</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggle2fa">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-card danger-zone">
+                    <h3>Zona de Perigo</h3>
+
+                    <div class="setting-row clickable" onclick="openModal('modalExcluir')">
+                        <div class="setting-info">
+                            <span class="setting-label text-danger">Excluir conta</span>
+                            <span class="setting-desc">Esta ação é irreversível</span>
+                        </div>
+                        <i class="bi bi-chevron-right text-danger"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção Privacidade -->
+            <div class="settings-section" id="section-privacidade" style="display: none;">
+                <div class="section-header">
+                    <i class="bi bi-lock-fill"></i>
+                    <h2>Privacidade</h2>
+                </div>
+
+                <div class="settings-card">
+                    <h3>Quem pode ver minhas informações</h3>
+
+                    <div class="setting-row clickable">
+                        <div class="setting-info">
+                            <span class="setting-label">Foto de perfil</span>
+                            <span class="setting-value">Todos</span>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </div>
+
+                    <div class="setting-row clickable">
+                        <div class="setting-info">
+                            <span class="setting-label">Status</span>
+                            <span class="setting-value">Todos</span>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </div>
+
+                    <div class="setting-row clickable">
+                        <div class="setting-info">
+                            <span class="setting-label">Visto por último</span>
+                            <span class="setting-value">Meus contatos</span>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <h3>Bloqueio</h3>
+
+                    <div class="setting-row clickable">
+                        <div class="setting-info">
+                            <span class="setting-label">Contatos bloqueados</span>
+                            <span class="setting-desc">0 contatos bloqueados</span>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <h3>Grupos</h3>
+
+                    <div class="setting-row clickable">
+                        <div class="setting-info">
+                            <span class="setting-label">Quem pode me adicionar em grupos</span>
+                            <span class="setting-value">Todos</span>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção Conversas -->
+            <div class="settings-section" id="section-conversas">
+                <div class="section-header">
+                    <i class="bi bi-chat-dots-fill"></i>
+                    <h2>Conversas</h2>
+                </div>
+
+                <div class="settings-card">
+                    <h3>Aparência</h3>
+
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <span class="setting-label">Tema</span>
+                            <span class="setting-desc">Escolha entre claro, escuro ou automático</span>
+                        </div>
+                    </div>
+
+                    <div class="theme-selector">
+                        <div class="theme-option" data-theme="light" onclick="setTheme('light')">
+                            <div class="theme-preview theme-light">
+                                <i class="bi bi-sun-fill"></i>
+                            </div>
+                            <span>Claro</span>
+                        </div>
+                        <div class="theme-option" data-theme="dark" onclick="setTheme('dark')">
+                            <div class="theme-preview theme-dark">
+                                <i class="bi bi-moon-fill"></i>
+                            </div>
+                            <span>Escuro</span>
+                        </div>
+                        <div class="theme-option" data-theme="auto" onclick="setTheme('auto')">
+                            <div class="theme-preview theme-auto">
+                                <i class="bi bi-circle-half"></i>
+                            </div>
+                            <span>Automático</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <h3>Papel de Parede</h3>
+
+                    <div class="wallpaper-selector">
+                        <div class="wallpaper-option active" data-wallpaper="default" onclick="setWallpaper('default')">
+                            <div class="wallpaper-preview" style="background: linear-gradient(135deg, #1a1a2e, #16213e);"></div>
+                            <span>Padrão</span>
+                        </div>
+                        <div class="wallpaper-option" data-wallpaper="gradient1" onclick="setWallpaper('gradient1')">
+                            <div class="wallpaper-preview" style="background: linear-gradient(135deg, #667eea, #764ba2);"></div>
+                            <span>Roxo</span>
+                        </div>
+                        <div class="wallpaper-option" data-wallpaper="gradient2" onclick="setWallpaper('gradient2')">
+                            <div class="wallpaper-preview" style="background: linear-gradient(135deg, #11998e, #38ef7d);"></div>
+                            <span>Verde</span>
+                        </div>
+                        <div class="wallpaper-option" data-wallpaper="gradient3" onclick="setWallpaper('gradient3')">
+                            <div class="wallpaper-preview" style="background: linear-gradient(135deg, #fc466b, #3f5efb);"></div>
+                            <span>Rosa</span>
+                        </div>
+                        <div class="wallpaper-option" data-wallpaper="solid1" onclick="setWallpaper('solid1')">
+                            <div class="wallpaper-preview" style="background: #0d1117;"></div>
+                            <span>Preto</span>
+                        </div>
+                        <div class="wallpaper-option" data-wallpaper="solid2" onclick="setWallpaper('solid2')">
+                            <div class="wallpaper-preview" style="background: #1e3a5f;"></div>
+                            <span>Azul</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <h3>Mensagens</h3>
+
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <span class="setting-label">Tamanho da fonte</span>
+                            <span class="setting-desc">Ajuste o tamanho do texto nas conversas</span>
+                        </div>
+                    </div>
+
+                    <div class="font-size-selector">
+                        <button class="font-btn" data-size="small" onclick="setFontSize('small')">A</button>
+                        <button class="font-btn active" data-size="medium" onclick="setFontSize('medium')">A</button>
+                        <button class="font-btn" data-size="large" onclick="setFontSize('large')">A</button>
+                    </div>
+
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <span class="setting-label">Tecla Enter para enviar</span>
+                            <span class="setting-desc">Pressione Enter para enviar mensagens</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggleEnterSend" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <h3>Histórico</h3>
+
+                    <div class="setting-row clickable">
+                        <div class="setting-info">
+                            <span class="setting-label">Exportar conversas</span>
+                            <span class="setting-desc">Baixe uma cópia das suas mensagens</span>
+                        </div>
+                        <i class="bi bi-download"></i>
+                    </div>
+
+                    <div class="setting-row clickable danger">
+                        <div class="setting-info">
+                            <span class="setting-label">Limpar todas as conversas</span>
+                            <span class="setting-desc">Apagar histórico de mensagens</span>
+                        </div>
+                        <i class="bi bi-trash"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção Notificações -->
+            <div class="settings-section" id="section-notificacoes" style="display: none;">
+                <div class="section-header">
+                    <i class="bi bi-bell-fill"></i>
+                    <h2>Notificações</h2>
+                </div>
+
+                <div class="settings-card">
+                    <h3>Alertas</h3>
+
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <span class="setting-label">Notificações de mensagens</span>
+                            <span class="setting-desc">Receber alertas de novas mensagens</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggleNotifMsg" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <span class="setting-label">Notificações de grupos</span>
+                            <span class="setting-desc">Receber alertas de mensagens em grupos</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggleNotifGrupo" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <span class="setting-label">Mostrar prévia</span>
+                            <span class="setting-desc">Exibir conteúdo da mensagem na notificação</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="togglePreview" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <h3>Sons</h3>
+
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <span class="setting-label">Som de notificação</span>
+                            <span class="setting-desc">Tocar som ao receber mensagens</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggleSound" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-row clickable">
+                        <div class="setting-info">
+                            <span class="setting-label">Tom de notificação</span>
+                            <span class="setting-value">Padrão</span>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </div>
+
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <span class="setting-label">Vibrar</span>
+                            <span class="setting-desc">Vibrar ao receber mensagens</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggleVibrate">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção Armazenamento -->
+            <div class="settings-section" id="section-armazenamento" style="display: none;">
+                <div class="section-header">
+                    <i class="bi bi-hdd-fill"></i>
+                    <h2>Armazenamento</h2>
+                </div>
+
+                <div class="settings-card">
+                    <h3>Uso de Dados</h3>
+
+                    <div class="storage-overview">
+                        <div class="storage-chart">
+                            <svg viewBox="0 0 36 36" class="circular-chart">
+                                <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path class="circle" stroke-dasharray="25, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            </svg>
+                            <div class="storage-text">
+                                <span class="storage-value">25%</span>
+                                <span class="storage-label">usado</span>
+                            </div>
+                        </div>
+                        <div class="storage-details">
+                            <div class="storage-item">
+                                <span class="storage-dot" style="background: var(--lime-primary);"></span>
+                                <span>Mensagens</span>
+                                <span class="storage-size">15 MB</span>
+                            </div>
+                            <div class="storage-item">
+                                <span class="storage-dot" style="background: var(--bg-sidebar);"></span>
+                                <span>Mídia</span>
+                                <span class="storage-size">45 MB</span>
+                            </div>
+                            <div class="storage-item">
+                                <span class="storage-dot" style="background: #6c757d;"></span>
+                                <span>Outros</span>
+                                <span class="storage-size">5 MB</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <h3>Gerenciar</h3>
+
+                    <div class="setting-row clickable">
+                        <div class="setting-info">
+                            <span class="setting-label">Limpar cache</span>
+                            <span class="setting-desc">Liberar espaço removendo arquivos temporários</span>
+                        </div>
+                        <i class="bi bi-trash"></i>
+                    </div>
+
+                    <div class="setting-row clickable">
+                        <div class="setting-info">
+                            <span class="setting-label">Gerenciar conversas</span>
+                            <span class="setting-desc">Ver e excluir conversas específicas</span>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção Ajuda -->
+            <div class="settings-section" id="section-ajuda" style="display: none;">
+                <div class="section-header">
+                    <i class="bi bi-question-circle-fill"></i>
+                    <h2>Ajuda</h2>
+                </div>
+
+                <div class="settings-card">
+                    <h3>Suporte</h3>
+
+                    <div class="setting-row clickable">
+                        <div class="setting-info">
+                            <span class="setting-label">Central de ajuda</span>
+                            <span class="setting-desc">Perguntas frequentes e tutoriais</span>
+                        </div>
+                        <i class="bi bi-box-arrow-up-right"></i>
+                    </div>
+
+                    <div class="setting-row clickable">
+                        <div class="setting-info">
+                            <span class="setting-label">Contate-nos</span>
+                            <span class="setting-desc">Entre em contato com o suporte</span>
+                        </div>
+                        <i class="bi bi-envelope"></i>
+                    </div>
+
+                    <div class="setting-row clickable">
+                        <div class="setting-info">
+                            <span class="setting-label">Reportar problema</span>
+                            <span class="setting-desc">Informe bugs ou erros</span>
+                        </div>
+                        <i class="bi bi-bug"></i>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <h3>Informações do App</h3>
+
+                    <div class="setting-row">
+                        <div class="setting-info">
+                            <span class="setting-label">Versão</span>
+                            <span class="setting-value">1.0.0</span>
+                        </div>
+                    </div>
+
+                    <div class="setting-row clickable">
+                        <div class="setting-info">
+                            <span class="setting-label">Termos de uso</span>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </div>
+
+                    <div class="setting-row clickable">
+                        <div class="setting-info">
+                            <span class="setting-label">Política de privacidade</span>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </div>
+                </div>
+
+                <div class="app-info">
+                    <div class="app-logo">
+                        <i class="bi bi-chat-dots-fill"></i>
+                    </div>
+                    <h4>Dialogus</h4>
+                    <p>Feito com carinho</p>
+                </div>
+            </div>
+
+            <!-- Estado vazio (quando nenhuma seção está selecionada em mobile) -->
+        <div class="settings-empty" id="section-empty" style="display: none;">
+            <i class="bi bi-gear-fill"></i>
+            <h2>Configurações</h2>
+            <p>Selecione uma opção ao lado</p>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Alterar Senha -->
+<div class="modal-overlay" id="modalSenha" onclick="closeModal('modalSenha', event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h3><i class="bi bi-lock-fill"></i> Alterar Senha</h3>
+            <button class="modal-close" onclick="closeModal('modalSenha')">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="formSenha">
+                <div class="form-group">
+                    <label>Senha atual</label>
+                    <input type="password" class="form-control form-control-modern" placeholder="Digite sua senha atual">
+                </div>
+                <div class="form-group">
+                    <label>Nova senha</label>
+                    <input type="password" class="form-control form-control-modern" placeholder="Digite a nova senha">
+                </div>
+                <div class="form-group">
+                    <label>Confirmar nova senha</label>
+                    <input type="password" class="form-control form-control-modern" placeholder="Confirme a nova senha">
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-cancel-modal" onclick="closeModal('modalSenha')">Cancelar</button>
+            <button class="btn btn-save-modal">Salvar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Excluir Conta -->
+<div class="modal-overlay" id="modalExcluir" onclick="closeModal('modalExcluir', event)">
+    <div class="modal-content modal-danger" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h3><i class="bi bi-exclamation-triangle-fill"></i> Excluir Conta</h3>
+            <button class="modal-close" onclick="closeModal('modalExcluir')">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p class="modal-warning">Esta ação é <strong>irreversível</strong>. Todos os seus dados serão permanentemente excluídos, incluindo:</p>
+            <ul class="delete-list">
+                <li><i class="bi bi-chat-dots"></i> Todas as suas mensagens</li>
+                <li><i class="bi bi-people"></i> Seus grupos e conversas</li>
+                <li><i class="bi bi-person"></i> Seu perfil e configurações</li>
+            </ul>
+            <div class="form-group">
+                <label>Digite sua senha para confirmar</label>
+                <input type="password" class="form-control form-control-modern" placeholder="Sua senha">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-cancel-modal" onclick="closeModal('modalExcluir')">Cancelar</button>
+            <button class="btn btn-danger-modal">Excluir minha conta</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.settings-page {
+    max-width: 800px;
+}
+
+.settings-content-main {
+    width: 100%;
+}
+
+/* Section Header */
+.section-header h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.125rem;
+}
+
+.settings-item-content p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Content Area */
+.settings-content {
+    flex: 1;
+    background: var(--bg-primary);
+    overflow-y: auto;
+    padding: 2rem;
+}
+
+.settings-section {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.section-header i {
+    font-size: 2rem;
+    color: var(--bg-sidebar);
+}
+
+.section-header h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* Settings Cards */
+.settings-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border-color);
+}
+
+.settings-card h3 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 1rem;
+}
+
+.setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.setting-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.setting-row:first-of-type {
+    padding-top: 0;
+}
+
+.setting-row.clickable {
+    cursor: pointer;
+    margin: 0 -1rem;
+    padding: 1rem;
+    border-radius: 8px;
+    border-bottom: none;
+}
+
+.setting-row.clickable:hover {
+    background: var(--bg-secondary);
+}
+
+.setting-row.danger:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.setting-row.danger .setting-label,
+.setting-row.danger i {
+    color: #ef4444;
+}
+
+.setting-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.setting-label {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.setting-value {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.setting-desc {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.btn-setting {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: none;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-setting:hover:not(:disabled) {
+    background: var(--bg-sidebar);
+    color: white;
+}
+
+.btn-setting:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+    position: relative;
+    width: 48px;
+    height: 26px;
+    cursor: pointer;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--bg-tertiary);
+    border-radius: 26px;
+    transition: all 0.3s ease;
+}
+
+.toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    left: 3px;
+    bottom: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    background: var(--lime-primary);
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+    transform: translateX(22px);
+}
+
+/* Theme Selector */
+.theme-selector {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.theme-option {
+    flex: 1;
+    text-align: center;
+    cursor: pointer;
+}
+
+.theme-preview {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    border: 3px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.theme-option.active .theme-preview {
+    border-color: var(--lime-primary);
+}
+
+.theme-light {
+    background: #f8f9fa;
+    color: #f59e0b;
+}
+
+.theme-dark {
+    background: #1a1a1a;
+    color: #6366f1;
+}
+
+.theme-auto {
+    background: linear-gradient(135deg, #f8f9fa 50%, #1a1a1a 50%);
+    color: var(--lime-primary);
+}
+
+.theme-option span {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* Wallpaper Selector */
+.wallpaper-selector {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.wallpaper-option {
+    text-align: center;
+    cursor: pointer;
+}
+
+.wallpaper-preview {
+    width: 100%;
+    aspect-ratio: 4/3;
+    border-radius: 12px;
+    margin-bottom: 0.5rem;
+    border: 3px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.wallpaper-option.active .wallpaper-preview {
+    border-color: var(--lime-primary);
+}
+
+.wallpaper-option span {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* Font Size Selector */
+.font-size-selector {
+    display: flex;
+    gap: 0.5rem;
+    margin: 1rem 0;
+}
+
+.font-btn {
+    flex: 1;
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.font-btn[data-size="small"] { font-size: 0.85rem; }
+.font-btn[data-size="medium"] { font-size: 1rem; }
+.font-btn[data-size="large"] { font-size: 1.2rem; }
+
+.font-btn.active {
+    border-color: var(--lime-primary);
+    background: var(--lime-primary);
+    color: var(--bg-sidebar);
+}
+
+/* Storage */
+.storage-overview {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    padding: 1rem 0;
+}
+
+.storage-chart {
+    position: relative;
+    width: 100px;
+    height: 100px;
+}
+
+.circular-chart {
+    display: block;
+    max-width: 100%;
+}
+
+.circle-bg {
+    fill: none;
+    stroke: var(--bg-tertiary);
+    stroke-width: 3;
+}
+
+.circle {
+    fill: none;
+    stroke: var(--lime-primary);
+    stroke-width: 3;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: center;
+}
+
+.storage-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.storage-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.storage-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.storage-details {
+    flex: 1;
+}
+
+.storage-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+}
+
+.storage-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.storage-item span:nth-child(2) {
+    flex: 1;
+    color: var(--text-primary);
+}
+
+.storage-size {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* Danger Zone */
+.danger-zone {
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.danger-zone h3 {
+    color: #ef4444;
+}
+
+/* App Info */
+.app-info {
+    text-align: center;
+    padding: 2rem;
+}
+
+.app-logo {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 1rem;
+    background: var(--bg-sidebar);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: var(--lime-primary);
+}
+
+.app-info h4 {
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.app-info p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* Settings Empty State */
+.settings-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-muted);
+}
+
+.settings-empty i {
+    font-size: 5rem;
+    opacity: 0.2;
+    margin-bottom: 1rem;
+}
+
+.settings-empty h2 {
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    padding: 1rem;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    background: var(--card-bg);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 420px;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.active .modal-content {
+    transform: scale(1);
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+
+.modal-header h3 i {
+    color: var(--bg-sidebar);
+}
+
+.modal-danger .modal-header h3 i {
+    color: #ef4444;
+}
+
+.modal-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-body .form-group {
+    margin-bottom: 1rem;
+}
+
+.modal-body .form-group:last-child {
+    margin-bottom: 0;
+}
+
+.modal-body label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.modal-warning {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.delete-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.5rem;
+}
+
+.delete-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    color: var(--text-muted);
+}
+
+.delete-list li i {
+    color: #ef4444;
+}
+
+.modal-footer {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.btn-cancel-modal {
+    flex: 1;
+    padding: 0.875rem;
+    border-radius: 10px;
+    border: none;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel-modal:hover {
+    background: var(--bg-tertiary);
+}
+
+.btn-save-modal {
+    flex: 1;
+    padding: 0.875rem;
+    border-radius: 10px;
+    border: none;
+    background: var(--lime-primary);
+    color: var(--bg-sidebar);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-save-modal:hover {
+    background: var(--lime-secondary);
+}
+
+.btn-danger-modal {
+    flex: 1;
+    padding: 0.875rem;
+    border-radius: 10px;
+    border: none;
+    background: #ef4444;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-danger-modal:hover {
+    background: #dc2626;
+}
+
+/* Responsivo */
+@media (max-width: 900px) {
+    .settings-sidebar {
+        width: 100%;
+        max-width: none;
+    }
+
+    .settings-content {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        padding: 1rem;
+    }
+
+    .settings-content.active {
+        display: block;
+    }
+
+    .section-header {
+        position: relative;
+        padding-left: 3rem;
+    }
+
+    .section-header::before {
+        content: '\F284';
+        font-family: 'bootstrap-icons';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: var(--text-primary);
+    }
+}
+
+/* Tema escuro */
+[data-theme="dark"] .settings-sidebar {
+    background: var(--bg-secondary);
+    border-color: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .settings-card {
+    background: var(--bg-secondary);
+    border-color: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .modal-content {
+    background: var(--bg-secondary);
+}
+
+[data-theme="dark"] .settings-search input {
+    background: var(--bg-tertiary);
+    border-color: var(--bg-tertiary);
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Mostrar seção
+function showSection(sectionId) {
+    // Esconder todas as seções
+    document.querySelectorAll('.settings-section').forEach(section => {
+        section.style.display = 'none';
+    });
+
+    // Remover active de todos os itens
+    document.querySelectorAll('.settings-item').forEach(item => {
+        item.classList.remove('active');
+    });
+
+    // Mostrar seção selecionada
+    const section = document.getElementById('section-' + sectionId);
+    if (section) {
+        section.style.display = 'block';
+    }
+
+    // Marcar item como ativo
+    const item = document.querySelector(`.settings-item[data-section="${sectionId}"]`);
+    if (item) {
+        item.classList.add('active');
+    }
+
+    // Mobile: mostrar content
+    if (window.innerWidth <= 900) {
+        document.querySelector('.settings-content').classList.add('active');
+    }
+}
+
+// Voltar no mobile
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.section-header') && window.innerWidth <= 900) {
+        document.querySelector('.settings-content').classList.remove('active');
+    }
+});
+
+// Definir tema
+function setTheme(theme) {
+    // Remover active de todas as opções
+    document.querySelectorAll('.theme-option').forEach(opt => {
+        opt.classList.remove('active');
+    });
+
+    // Adicionar active na opção selecionada
+    document.querySelector(`.theme-option[data-theme="${theme}"]`).classList.add('active');
+
+    // Aplicar tema
+    if (theme === 'auto') {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.setAttribute('data-theme', prefersDark ? 'dark' : 'light');
+    } else {
+        document.documentElement.setAttribute('data-theme', theme);
+    }
+
+    // Salvar preferência
+    localStorage.setItem('theme', theme);
+}
+
+// Definir papel de parede
+function setWallpaper(wallpaper) {
+    document.querySelectorAll('.wallpaper-option').forEach(opt => {
+        opt.classList.remove('active');
+    });
+    document.querySelector(`.wallpaper-option[data-wallpaper="${wallpaper}"]`).classList.add('active');
+    localStorage.setItem('wallpaper', wallpaper);
+}
+
+// Definir tamanho da fonte
+function setFontSize(size) {
+    document.querySelectorAll('.font-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.querySelector(`.font-btn[data-size="${size}"]`).classList.add('active');
+    localStorage.setItem('fontSize', size);
+}
+
+// Modal
+function openModal(modalId) {
+    document.getElementById(modalId).classList.add('active');
+}
+
+function closeModal(modalId, event) {
+    if (!event || event.target.classList.contains('modal-overlay')) {
+        document.getElementById(modalId).classList.remove('active');
+    }
+}
+
+// Pesquisar configurações
+document.getElementById('searchSettings').addEventListener('input', function(e) {
+    const query = e.target.value.toLowerCase();
+
+    document.querySelectorAll('.settings-item').forEach(item => {
+        const text = item.textContent.toLowerCase();
+        item.style.display = text.includes(query) ? 'flex' : 'none';
+    });
+});
+
+// Inicializar tema selecionado
+document.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    const themeOption = document.querySelector(`.theme-option[data-theme="${savedTheme}"]`);
+    if (themeOption) {
+        themeOption.classList.add('active');
+    }
+});
+
+// Fechar modal com ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.active').forEach(modal => {
+            modal.classList.remove('active');
+        });
+    }
+});
+</script>
+{% endblock %}

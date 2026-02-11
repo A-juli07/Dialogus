@@ -342,3 +342,12 @@ def buscar_usuarios(request):
         })
 
     return JsonResponse({'usuarios': resultado})
+
+@login_required
+def configuracoes(request):
+    """View de configurações do usuário"""
+    perfil, created = Perfil.objects.get_or_create(usuario=request.user)
+
+    return render(request, 'chat/configuracoes.html', {
+        'perfil': perfil
+    })

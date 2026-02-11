@@ -2,246 +2,746 @@
 
 {% block title %}Meu Perfil - Dialogus{% endblock %}
 
+{% block sidebar_title %}Meu Perfil{% endblock %}
+
+{% block sidebar_content %}
+<!-- Menu de Ações do Perfil -->
+<a href="{% url 'index' %}" class="conversation-item">
+    <div class="conversation-avatar">
+        <i class="bi bi-house-fill"></i>
+    </div>
+    <div class="conversation-info">
+        <div class="conversation-name">Início</div>
+        <div class="conversation-preview">Voltar para o início</div>
+    </div>
+</a>
+
+<a href="{% url 'configuracoes' %}" class="conversation-item">
+    <div class="conversation-avatar" style="background: linear-gradient(135deg, #6b7280, #4b5563);">
+        <i class="bi bi-gear-fill"></i>
+    </div>
+    <div class="conversation-info">
+        <div class="conversation-name">Configurações</div>
+        <div class="conversation-preview">Ajustes da conta</div>
+    </div>
+</a>
+
+<a href="{% url 'salas' %}" class="conversation-item">
+    <div class="conversation-avatar group">
+        <i class="bi bi-people-fill"></i>
+    </div>
+    <div class="conversation-info">
+        <div class="conversation-name">Meus Grupos</div>
+        <div class="conversation-preview">Ver grupos</div>
+    </div>
+</a>
+
+<a href="{% url 'enviar_convite' %}" class="conversation-item">
+    <div class="conversation-avatar" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+        <i class="bi bi-person-plus-fill"></i>
+    </div>
+    <div class="conversation-info">
+        <div class="conversation-name">Novo Contato</div>
+        <div class="conversation-preview">Adicionar amigo</div>
+    </div>
+</a>
+{% endblock %}
+
 {% block content %}
-<div class="container fade-in" style="max-width: 900px;">
+<div class="profile-page fade-in">
     <!-- Header do Perfil -->
-    <div class="profile-header mb-4">
-        <div class="text-center">
-            {% if perfil.foto_perfil %}
-                <img src="{{ perfil.foto_perfil.url }}" class="profile-avatar" alt="Foto de Perfil">
-            {% else %}
-                <div class="profile-avatar mx-auto d-flex align-items-center justify-content-center" style="background: var(--gradient-primary); font-size: 3rem;">
-                    {{ user.username|slice:":1"|upper }}
+    <div class="profile-hero">
+        <div class="profile-hero-bg"></div>
+        <div class="profile-hero-content">
+            <div class="profile-avatar-wrapper">
+                {% if perfil.foto_perfil %}
+                    <img src="{{ perfil.foto_perfil.url }}" class="profile-avatar-large" alt="Foto de Perfil">
+                {% else %}
+                    <div class="profile-avatar-large profile-avatar-placeholder">
+                        {{ user.username|slice:":1"|upper }}
+                    </div>
+                {% endif %}
+                <div class="profile-avatar-badge">
+                    <i class="bi bi-camera-fill"></i>
                 </div>
-            {% endif %}
-            <h2 class="profile-name">{{ user.username }}</h2>
+            </div>
+            <h1 class="profile-username">{{ user.username }}</h1>
             {% if perfil.status %}
-                <p class="profile-status">
-                    <i class="bi bi-chat-quote"></i> {{ perfil.status }}
+                <p class="profile-status-text">
+                    <i class="bi bi-chat-quote-fill"></i> {{ perfil.status }}
                 </p>
             {% else %}
-                <p class="profile-status opacity-75">
-                    <i class="bi bi-info-circle"></i> Adicione um status
+                <p class="profile-status-text profile-status-empty">
+                    <i class="bi bi-plus-circle"></i> Adicione um status
                 </p>
             {% endif %}
         </div>
     </div>
 
-    <!-- Informações do Usuário -->
-    <div class="row mb-4">
-        <div class="col-md-6 mb-3">
-            <div class="card-modern h-100">
-                <div class="card-body text-center p-4">
-                    <i class="bi bi-person-badge" style="font-size: 2.5rem; color: var(--accent-primary);"></i>
-                    <h6 class="mt-3 mb-1 text-muted">ID do Usuário</h6>
-                    <h4 class="mb-0">#{{ user.id }}</h4>
+    <div class="profile-content">
+        <!-- Cards de Informações -->
+        <div class="profile-stats">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, var(--bg-sidebar), var(--bg-sidebar-dark));">
+                    <i class="bi bi-person-badge-fill"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-label">ID do Usuário</span>
+                    <span class="stat-value">#{{ user.id }}</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, var(--lime-primary), var(--lime-secondary));">
+                    <i class="bi bi-calendar-check-fill"></i>
+                </div>
+                <div class="stat-info">
+                    <span class="stat-label">Membro desde</span>
+                    <span class="stat-value">{{ user.date_joined|date:"d/m/Y" }}</span>
                 </div>
             </div>
         </div>
-        <div class="col-md-6 mb-3">
-            <div class="card-modern h-100">
-                <div class="card-body text-center p-4">
-                    <i class="bi bi-calendar-check" style="font-size: 2.5rem; color: var(--accent-success);"></i>
-                    <h6 class="mt-3 mb-1 text-muted">Membro desde</h6>
-                    <h4 class="mb-0">{{ user.date_joined|date:"d/m/Y" }}</h4>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Formulário de Edição -->
-    <div class="card-modern">
-        <div class="card-header" style="background: var(--gradient-primary); color: white;">
-            <h5 class="mb-0">
-                <i class="bi bi-pencil-square me-2"></i>
-                Editar Perfil
-            </h5>
-        </div>
-        <div class="card-body p-4">
-            <form method="post" enctype="multipart/form-data" id="profileForm">
+        <!-- Formulário de Edição -->
+        <div class="profile-edit-card">
+            <div class="edit-card-header">
+                <div class="edit-header-icon">
+                    <i class="bi bi-pencil-square"></i>
+                </div>
+                <div>
+                    <h2>Editar Perfil</h2>
+                    <p>Personalize suas informações</p>
+                </div>
+            </div>
+
+            <form method="post" enctype="multipart/form-data" id="profileForm" class="profile-form">
                 {% csrf_token %}
 
                 <!-- Upload de Foto -->
-                <div class="mb-4">
-                    <label class="form-label fw-bold">
-                        <i class="bi bi-camera-fill me-2"></i>
-                        Foto de Perfil
+                <div class="form-section">
+                    <label class="form-label">
+                        <i class="bi bi-camera-fill"></i> Foto de Perfil
                     </label>
-                    <div class="text-center mb-3">
-                        <div class="profile-photo-preview" id="photoPreview">
+                    <div class="photo-upload-area">
+                        <div class="photo-preview" id="photoPreview">
                             {% if perfil.foto_perfil %}
-                                <img src="{{ perfil.foto_perfil.url }}" alt="Preview" style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid var(--accent-primary);">
+                                <img src="{{ perfil.foto_perfil.url }}" alt="Preview">
                             {% else %}
-                                <div style="width: 150px; height: 150px; border-radius: 50%; background: var(--gradient-primary); color: white; display: inline-flex; align-items: center; justify-content: center; font-size: 4rem; font-weight: bold;">
+                                <div class="photo-placeholder">
                                     {{ user.username|slice:":1"|upper }}
                                 </div>
                             {% endif %}
                         </div>
+                        <div class="photo-upload-info">
+                            <label for="id_foto_perfil" class="btn btn-upload">
+                                <i class="bi bi-cloud-arrow-up-fill"></i> Escolher foto
+                            </label>
+                            <input type="file" name="foto_perfil" id="id_foto_perfil" accept="image/*" onchange="previewImage(this)" hidden>
+                            <p class="upload-hint">JPG, PNG ou GIF (max 5MB)</p>
+                        </div>
                     </div>
-                    <div class="input-group">
-                        <input type="file" class="form-control" name="foto_perfil" id="id_foto_perfil" accept="image/*" onchange="previewImage(this)">
-                        <label class="input-group-text" for="id_foto_perfil">
-                            <i class="bi bi-upload"></i>
-                        </label>
-                    </div>
-                    <small class="text-muted">
-                        <i class="bi bi-info-circle me-1"></i>
-                        Formatos aceitos: JPG, PNG, GIF (max 5MB)
-                    </small>
                 </div>
 
-                <hr class="my-4">
-
                 <!-- Status -->
-                <div class="mb-4">
-                    <label for="id_status" class="form-label fw-bold">
-                        <i class="bi bi-chat-quote-fill me-2"></i>
-                        Status
+                <div class="form-section">
+                    <label for="id_status" class="form-label">
+                        <i class="bi bi-chat-quote-fill"></i> Status
                     </label>
-                    <input
-                        type="text"
-                        class="form-control form-control-lg"
-                        name="status"
-                        id="id_status"
-                        value="{{ perfil.status }}"
-                        placeholder="Ex: Disponível para chat!"
-                        maxlength="100"
-                    >
-                    <div class="form-text">
-                        <span id="statusCount">{{ perfil.status|length|default:"0" }}</span>/100 caracteres
+                    <div class="input-with-counter">
+                        <input
+                            type="text"
+                            class="form-control form-control-modern"
+                            name="status"
+                            id="id_status"
+                            value="{{ perfil.status }}"
+                            placeholder="Ex: Disponível para conversar!"
+                            maxlength="100"
+                        >
+                        <span class="char-counter"><span id="statusCount">{{ perfil.status|length|default:"0" }}</span>/100</span>
                     </div>
                 </div>
 
                 <!-- Biografia -->
-                <div class="mb-4">
-                    <label for="id_biografia" class="form-label fw-bold">
-                        <i class="bi bi-file-text-fill me-2"></i>
-                        Biografia
+                <div class="form-section">
+                    <label for="id_biografia" class="form-label">
+                        <i class="bi bi-file-text-fill"></i> Biografia
                     </label>
-                    <textarea
-                        class="form-control"
-                        name="biografia"
-                        id="id_biografia"
-                        rows="4"
-                        placeholder="Conte um pouco sobre você..."
-                        maxlength="500"
-                    >{{ perfil.biografia }}</textarea>
-                    <div class="form-text">
-                        <span id="bioCount">{{ perfil.biografia|length|default:"0" }}</span>/500 caracteres
+                    <div class="input-with-counter">
+                        <textarea
+                            class="form-control form-control-modern"
+                            name="biografia"
+                            id="id_biografia"
+                            rows="4"
+                            placeholder="Conte um pouco sobre você..."
+                            maxlength="500"
+                        >{{ perfil.biografia }}</textarea>
+                        <span class="char-counter textarea-counter"><span id="bioCount">{{ perfil.biografia|length|default:"0" }}</span>/500</span>
                     </div>
                 </div>
 
-                <hr class="my-4">
-
                 <!-- Botões de Ação -->
-                <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-gradient-primary btn-lg btn-modern">
-                        <i class="bi bi-check-circle-fill me-2"></i>
-                        Salvar Alterações
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-save">
+                        <i class="bi bi-check-circle-fill"></i> Salvar Alterações
                     </button>
-                    <a href="{% url 'index' %}" class="btn btn-outline-secondary btn-modern">
-                        <i class="bi bi-x-circle me-2"></i>
-                        Cancelar
+                    <a href="{% url 'index' %}" class="btn btn-cancel">
+                        <i class="bi bi-x-circle"></i> Cancelar
                     </a>
                 </div>
             </form>
         </div>
-    </div>
 
-    <!-- Dicas -->
-    <div class="row mt-4 mb-4">
-        <div class="col-md-4 mb-3">
-            <div class="card-modern text-center p-3">
-                <i class="bi bi-shield-check" style="font-size: 2rem; color: var(--accent-success);"></i>
-                <h6 class="mt-2 mb-1">Privacidade</h6>
-                <small class="text-muted">Suas informações são privadas</small>
+        <!-- Dicas -->
+        <div class="profile-tips">
+            <div class="tip-card">
+                <div class="tip-icon">
+                    <i class="bi bi-shield-check"></i>
+                </div>
+                <h3>Privacidade</h3>
+                <p>Suas informações são privadas e seguras</p>
             </div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <div class="card-modern text-center p-3">
-                <i class="bi bi-lightning-charge" style="font-size: 2rem; color: var(--accent-warning);"></i>
-                <h6 class="mt-2 mb-1">Rápido</h6>
-                <small class="text-muted">Atualizações instantâneas</small>
+            <div class="tip-card">
+                <div class="tip-icon">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                </div>
+                <h3>Instantâneo</h3>
+                <p>Atualizações aplicadas em tempo real</p>
             </div>
-        </div>
-        <div class="col-md-4 mb-3">
-            <div class="card-modern text-center p-3">
-                <i class="bi bi-star-fill" style="font-size: 2rem; color: var(--accent-info);"></i>
-                <h6 class="mt-2 mb-1">Personalize</h6>
-                <small class="text-muted">Deixe seu perfil único</small>
+            <div class="tip-card">
+                <div class="tip-icon">
+                    <i class="bi bi-palette-fill"></i>
+                </div>
+                <h3>Personalize</h3>
+                <p>Deixe seu perfil com a sua cara</p>
             </div>
         </div>
     </div>
 </div>
 
 <style>
-    /* Preview de foto */
-    .profile-photo-preview {
-        margin: 0 auto;
-        position: relative;
-        display: inline-block;
+.profile-page {
+    min-height: 100vh;
+    background: var(--bg-primary);
+}
+
+/* Hero Section */
+.profile-hero {
+    position: relative;
+    padding: 3rem 2rem 5rem;
+    text-align: center;
+    overflow: hidden;
+}
+
+.profile-hero-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--bg-sidebar);
+    clip-path: ellipse(80% 100% at 50% 0%);
+}
+
+.profile-hero-bg::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(200, 232, 67, 0.1) 0%, transparent 50%);
+    animation: pulse-hero 8s ease-in-out infinite;
+}
+
+@keyframes pulse-hero {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+.profile-hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.profile-avatar-wrapper {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 1.5rem;
+}
+
+.profile-avatar-large {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    border: 5px solid var(--lime-primary);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    object-fit: cover;
+}
+
+.profile-avatar-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--lime-primary), var(--lime-secondary));
+    color: var(--bg-sidebar);
+    font-size: 4rem;
+    font-weight: 700;
+}
+
+.profile-avatar-badge {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    width: 40px;
+    height: 40px;
+    background: var(--lime-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bg-sidebar);
+    font-size: 1.1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.profile-username {
+    color: white;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.profile-status-text {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.profile-status-text i {
+    color: var(--lime-primary);
+}
+
+.profile-status-empty {
+    opacity: 0.7;
+}
+
+/* Content Section */
+.profile-content {
+    max-width: 900px;
+    margin: -2rem auto 0;
+    padding: 0 1.5rem 3rem;
+    position: relative;
+    z-index: 2;
+}
+
+/* Stats Cards */
+.profile-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.stat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+}
+
+.stat-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* Edit Card */
+.profile-edit-card {
+    background: var(--card-bg);
+    border-radius: 24px;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.edit-card-header {
+    background: var(--bg-sidebar);
+    padding: 1.5rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: white;
+}
+
+.edit-header-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--lime-primary);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--bg-sidebar);
+}
+
+.edit-card-header h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.edit-card-header p {
+    font-size: 0.9rem;
+    opacity: 0.85;
+    margin: 0;
+}
+
+.profile-form {
+    padding: 2rem;
+}
+
+.form-section {
+    margin-bottom: 1.75rem;
+}
+
+.form-label {
+    display: block;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+    font-size: 0.95rem;
+}
+
+.form-label i {
+    margin-right: 0.5rem;
+    color: var(--bg-sidebar);
+}
+
+/* Photo Upload */
+.photo-upload-area {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: var(--bg-secondary);
+    border-radius: 16px;
+    border: 2px dashed var(--border-color);
+    transition: border-color 0.3s ease;
+}
+
+.photo-upload-area:hover {
+    border-color: var(--lime-primary);
+}
+
+.photo-preview {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.photo-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.photo-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, var(--lime-primary), var(--lime-secondary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--bg-sidebar);
+}
+
+.photo-upload-info {
+    flex: 1;
+}
+
+.btn-upload {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--bg-sidebar);
+    color: white;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-upload:hover {
+    background: var(--bg-sidebar-dark);
+    transform: translateY(-2px);
+    color: white;
+}
+
+.upload-hint {
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* Form Controls */
+.form-control-modern {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    font-size: 0.95rem;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    transition: all 0.3s ease;
+}
+
+.form-control-modern:focus {
+    outline: none;
+    border-color: var(--bg-sidebar);
+    box-shadow: 0 0 0 4px rgba(47, 61, 122, 0.1);
+}
+
+textarea.form-control-modern {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.input-with-counter {
+    position: relative;
+}
+
+.char-counter {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.textarea-counter {
+    top: auto;
+    bottom: 12px;
+    transform: none;
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.btn-save {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    background: var(--lime-primary);
+    color: var(--bg-sidebar);
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-save:hover {
+    background: var(--lime-secondary);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(200, 232, 67, 0.4);
+    color: var(--bg-sidebar);
+}
+
+.btn-cancel {
+    padding: 1rem 1.5rem;
+    background: transparent;
+    color: var(--text-muted);
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.btn-cancel:hover {
+    border-color: var(--text-muted);
+    color: var(--text-primary);
+}
+
+/* Tips Section */
+.profile-tips {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.tip-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 1.5rem;
+    text-align: center;
+    border: 1px solid var(--border-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.tip-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+
+.tip-icon {
+    width: 50px;
+    height: 50px;
+    margin: 0 auto 1rem;
+    background: var(--bg-secondary);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--lime-primary);
+}
+
+.tip-card h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.tip-card p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .profile-hero {
+        padding: 2rem 1rem 4rem;
     }
 
-    .profile-photo-preview img {
-        box-shadow: var(--shadow-lg);
-        transition: transform 0.3s ease;
+    .profile-avatar-large {
+        width: 110px;
+        height: 110px;
     }
 
-    .profile-photo-preview img:hover {
-        transform: scale(1.05);
+    .profile-avatar-placeholder {
+        font-size: 3rem;
     }
 
-    /* Form controls modernos */
-    .form-control,
-    .form-select {
-        border: 2px solid var(--bg-tertiary);
-        border-radius: var(--border-radius-md);
-        padding: 0.75rem 1rem;
-        transition: all var(--transition-fast);
+    .profile-username {
+        font-size: 1.5rem;
     }
 
-    .form-control:focus,
-    .form-select:focus {
-        border-color: var(--accent-primary);
-        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+    .profile-stats {
+        grid-template-columns: 1fr;
     }
 
-    .form-label {
-        color: var(--text-primary);
-        margin-bottom: 0.5rem;
+    .profile-form {
+        padding: 1.5rem;
     }
 
-    /* Input group */
-    .input-group-text {
-        background: var(--gradient-primary);
-        color: white;
-        border: none;
-        cursor: pointer;
+    .photo-upload-area {
+        flex-direction: column;
+        text-align: center;
     }
 
-    /* Contador de caracteres */
-    .form-text {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-top: 0.5rem;
+    .form-actions {
+        flex-direction: column;
     }
 
-    /* Profile header responsivo */
-    @media (max-width: 768px) {
-        .profile-header {
-            padding: 2rem 1rem;
-        }
-
-        .profile-avatar {
-            width: 100px !important;
-            height: 100px !important;
-        }
-
-        .profile-name {
-            font-size: 1.5rem;
-        }
+    .btn-cancel {
+        order: 2;
     }
+
+    .profile-tips {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Tema escuro */
+[data-theme="dark"] .profile-edit-card {
+    background: var(--bg-secondary);
+    border-color: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .tip-card {
+    background: var(--bg-secondary);
+    border-color: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .photo-upload-area {
+    background: var(--bg-tertiary);
+    border-color: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .form-control-modern {
+    background: var(--bg-tertiary);
+    border-color: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .form-control-modern:focus {
+    background: var(--bg-secondary);
+    border-color: var(--lime-primary);
+}
+
+[data-theme="dark"] .tip-icon {
+    background: var(--bg-tertiary);
+}
 </style>
 
 {% endblock %}
@@ -255,16 +755,16 @@
 
             reader.onload = function(e) {
                 const preview = document.getElementById('photoPreview');
-                preview.innerHTML = `
-                    <img src="${e.target.result}" alt="Preview"
-                         style="width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 4px solid var(--accent-primary);">
-                `;
+                preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
 
                 // Animação de entrada
-                preview.querySelector('img').style.opacity = '0';
+                const img = preview.querySelector('img');
+                img.style.opacity = '0';
+                img.style.transform = 'scale(0.8)';
                 setTimeout(() => {
-                    preview.querySelector('img').style.transition = 'opacity 0.3s ease';
-                    preview.querySelector('img').style.opacity = '1';
+                    img.style.transition = 'all 0.3s ease';
+                    img.style.opacity = '1';
+                    img.style.transform = 'scale(1)';
                 }, 10);
             };
 

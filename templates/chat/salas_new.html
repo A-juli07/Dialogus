@@ -1,240 +1,411 @@
-{% extends 'chat/chat_layout.html' %}
+{% extends 'chat/base.html' %}
+{% load chat_extras %}
 
 {% block title %}Grupos - Dialogus{% endblock %}
 
+{% block sidebar_title %}Grupos{% endblock %}
+
 {% block sidebar_content %}
+<!-- DMs -->
 {% if dms %}
     {% for dm in dms %}
         <a href="{% url 'room' room_name=dm.get_nome_sala %}"
-           class="wa-conversation-item"
+           class="conversation-item"
            data-name="{% if dm.usuario1 == user %}{{ dm.usuario2.username|lower }}{% else %}{{ dm.usuario1.username|lower }}{% endif %}">
-            <div class="wa-conv-avatar">
+            <div class="conversation-avatar">
                 {% if dm.usuario1 == user %}
                     {{ dm.usuario2.username|slice:":1"|upper }}
                 {% else %}
                     {{ dm.usuario1.username|slice:":1"|upper }}
                 {% endif %}
             </div>
-            <div class="wa-conv-content">
-                <div class="wa-conv-header">
-                    <span class="wa-conv-name">
-                        {% if dm.usuario1 == user %}
-                            {{ dm.usuario2.username }}
-                        {% else %}
-                            {{ dm.usuario1.username }}
-                        {% endif %}
-                    </span>
+            <div class="conversation-info">
+                <div class="conversation-name">
+                    {% if dm.usuario1 == user %}
+                        {{ dm.usuario2.username }}
+                    {% else %}
+                        {{ dm.usuario1.username }}
+                    {% endif %}
                 </div>
-                <div class="wa-conv-preview">
-                    <span class="wa-last-msg">Mensagem privada</span>
-                </div>
+                <div class="conversation-preview">Mensagem privada</div>
             </div>
+            {% if dm_unread %}
+                {% with unread=dm_unread|get_item:dm.id %}
+                    {% if unread and unread > 0 %}
+                    <div class="conversation-meta">
+                        <span class="unread-badge">{{ unread }}</span>
+                    </div>
+                    {% endif %}
+                {% endwith %}
+            {% endif %}
         </a>
     {% endfor %}
 {% endif %}
 
+<!-- Grupos -->
 {% if salas %}
     {% for sala in salas %}
         <a href="{% url 'room' room_name=sala.nome %}"
-           class="wa-conversation-item"
+           class="conversation-item"
            data-name="{{ sala.nome|lower }}">
-            <div class="wa-conv-avatar">
+            <div class="conversation-avatar group">
                 <i class="bi bi-people-fill"></i>
             </div>
-            <div class="wa-conv-content">
-                <div class="wa-conv-header">
-                    <span class="wa-conv-name">{{ sala.nome }}</span>
-                </div>
-                <div class="wa-conv-preview">
-                    <span class="wa-last-msg">{% if sala.publica %}Grupo público{% else %}Grupo privado{% endif %}</span>
-                </div>
+            <div class="conversation-info">
+                <div class="conversation-name">{{ sala.nome }}</div>
+                <div class="conversation-preview">{% if sala.publica %}Grupo público{% else %}Grupo privado{% endif %}</div>
             </div>
+            {% if sala_unread %}
+                {% with unread=sala_unread|get_item:sala.id %}
+                    {% if unread and unread > 0 %}
+                    <div class="conversation-meta">
+                        <span class="unread-badge">{{ unread }}</span>
+                    </div>
+                    {% endif %}
+                {% endwith %}
+            {% endif %}
         </a>
     {% endfor %}
 {% endif %}
 
 {% if not dms and not salas %}
-    <div class="text-center text-white-50 py-5">
-        <i class="bi bi-chat-dots" style="font-size: 3rem; opacity: 0.3;"></i>
-        <p class="mt-3">Nenhuma conversa ainda</p>
-        <a href="{% url 'enviar_convite' %}" class="btn btn-sm" style="background: var(--lime-primary); color: var(--text-primary);">
-            Iniciar Conversa
+    <div class="sidebar-empty">
+        <i class="bi bi-people"></i>
+        <p>Nenhum grupo ainda</p>
+        <a href="{% url 'criar_sala' %}" class="btn">
+            <i class="bi bi-plus-lg me-1"></i> Criar Grupo
         </a>
     </div>
 {% endif %}
 {% endblock %}
 
-{% block chat_content %}
-<!-- Header WhatsApp-Style -->
-<div class="wa-chat-header">
-    <div class="wa-chat-avatar" style="background: var(--lime-primary); color: var(--text-primary);">
-        <i class="bi bi-people-fill"></i>
-    </div>
-    <div class="wa-chat-info">
-        <h3 class="wa-chat-name">Grupos de Chat</h3>
-        <span class="wa-chat-status">Explore grupos públicos ou acesse seus grupos privados</span>
-    </div>
-    <div class="wa-chat-actions">
-        <a href="{% url 'criar_sala' %}" class="wa-icon-btn" title="Criar grupo">
-            <i class="bi bi-plus-lg"></i>
+{% block content %}
+<div class="groups-page fade-in">
+    <!-- Grupos Públicos -->
+    <section class="groups-section">
+        <div class="section-header">
+            <div class="section-title">
+                <i class="bi bi-globe"></i>
+                <h2>Grupos Públicos</h2>
+            </div>
+            <span class="section-count">{{ salas_publicas|length }} grupos</span>
+        </div>
+
+        {% if salas_publicas %}
+        <div class="groups-grid">
+            {% for sala in salas_publicas %}
+            <a href="{% url 'room' room_name=sala.nome %}" class="group-card">
+                <div class="group-avatar">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div class="group-info">
+                    <h3>{{ sala.nome }}</h3>
+                    <p><i class="bi bi-globe"></i> Grupo público</p>
+                </div>
+                <div class="group-enter">
+                    <i class="bi bi-arrow-right"></i>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="bi bi-globe"></i>
+            <p>Nenhum grupo público disponível</p>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- Meus Grupos Privados -->
+    <section class="groups-section">
+        <div class="section-header">
+            <div class="section-title">
+                <i class="bi bi-lock-fill"></i>
+                <h2>Meus Grupos Privados</h2>
+            </div>
+            <span class="section-count">{{ minhas_salas_privadas|length }} grupos</span>
+        </div>
+
+        {% if minhas_salas_privadas %}
+        <div class="groups-grid">
+            {% for sala in minhas_salas_privadas %}
+            <a href="{% url 'room' room_name=sala.nome %}" class="group-card private">
+                <div class="group-avatar private">
+                    <i class="bi bi-shield-lock-fill"></i>
+                </div>
+                <div class="group-info">
+                    <h3>{{ sala.nome }}</h3>
+                    <p><i class="bi bi-person-badge"></i> Você é o dono</p>
+                </div>
+                <div class="group-enter">
+                    <i class="bi bi-arrow-right"></i>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state small">
+            <i class="bi bi-lock"></i>
+            <p>Você não tem grupos privados</p>
+            <small>Crie um grupo privado para conversas exclusivas</small>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- Grupos que Tenho Acesso -->
+    {% if salas_autorizadas %}
+    <section class="groups-section">
+        <div class="section-header">
+            <div class="section-title">
+                <i class="bi bi-key-fill"></i>
+                <h2>Grupos com Acesso</h2>
+            </div>
+            <span class="section-count">{{ salas_autorizadas|length }} grupos</span>
+        </div>
+
+        <div class="groups-grid">
+            {% for sala in salas_autorizadas %}
+            <a href="{% url 'room' room_name=sala.nome %}" class="group-card authorized">
+                <div class="group-avatar authorized">
+                    <i class="bi bi-key-fill"></i>
+                </div>
+                <div class="group-info">
+                    <h3>{{ sala.nome }}</h3>
+                    <p><i class="bi bi-check-circle"></i> Acesso liberado</p>
+                </div>
+                <div class="group-enter">
+                    <i class="bi bi-arrow-right"></i>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Botão de Criar Grupo -->
+    <div class="create-group-cta">
+        <a href="{% url 'criar_sala' %}" class="create-group-btn">
+            <i class="bi bi-plus-circle-fill"></i>
+            Criar Novo Grupo
         </a>
     </div>
 </div>
 
-<!-- Área Principal de Salas -->
-<div class="p-4" style="background: var(--wa-chat-bg); flex: 1; overflow-y: auto;">
+<style>
+.groups-page {
+    max-width: 900px;
+}
 
-    <!-- Grupos Públicos -->
-    <div class="mb-5">
-        <div class="d-flex align-items-center justify-content-between mb-3">
-            <h3 class="mb-0" style="color: var(--bg-sidebar);">
-                <i class="bi bi-globe me-2"></i>
-                Grupos Públicos
-            </h3>
-            <span class="badge badge-modern" style="background: var(--lime-primary); color: var(--text-primary);">
-                {{ salas_publicas|length }} grupos
-            </span>
-        </div>
+.groups-section {
+    margin-bottom: 2rem;
+}
 
-        {% if salas_publicas %}
-            <div class="rooms-grid">
-                {% for sala in salas_publicas %}
-                    <div class="room-card">
-                        <div class="room-card-icon" style="background: var(--bg-sidebar); color: white;">
-                            <i class="bi bi-people-fill"></i>
-                        </div>
-                        <h5 class="room-card-title">{{ sala.nome }}</h5>
-                        <p class="room-card-description">
-                            <i class="bi bi-person-fill"></i> Criado por <strong>{{ sala.dono.username }}</strong>
-                        </p>
-                        <a href="{% url 'room' room_name=sala.nome %}" class="btn w-100 btn-modern" style="background: var(--lime-primary); color: var(--text-primary);">
-                            <i class="bi bi-box-arrow-in-right me-2"></i>
-                            Entrar
-                        </a>
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="card-modern">
-                <div class="card-body text-center py-5">
-                    <i class="bi bi-globe" style="font-size: 4rem; opacity: 0.2; color: var(--bg-sidebar);"></i>
-                    <h5 class="mt-3 text-muted">Nenhum grupo público disponível</h5>
-                    <p class="text-muted mb-4">Seja o primeiro a criar um grupo público!</p>
-                    <a href="{% url 'criar_sala' %}" class="btn btn-modern" style="background: var(--lime-primary); color: var(--text-primary);">
-                        <i class="bi bi-plus-circle-fill me-2"></i>
-                        Criar Primeiro Grupo
-                    </a>
-                </div>
-            </div>
-        {% endif %}
-    </div>
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
 
-    <!-- Meus Grupos Privados -->
-    <div class="mb-5">
-        <div class="d-flex align-items-center justify-content-between mb-3">
-            <h3 class="mb-0" style="color: var(--bg-sidebar);">
-                <i class="bi bi-shield-lock-fill me-2"></i>
-                Meus Grupos Privados
-            </h3>
-            <span class="badge badge-modern" style="background: var(--bg-sidebar); color: white;">
-                {{ minhas_salas_privadas|length }} grupos
-            </span>
-        </div>
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
 
-        {% if minhas_salas_privadas %}
-            <div class="rooms-grid">
-                {% for sala in minhas_salas_privadas %}
-                    <div class="room-card">
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <div class="room-card-icon" style="background: var(--bg-sidebar); color: white; width: 50px; height: 50px;">
-                                <i class="bi bi-shield-lock-fill"></i>
-                            </div>
-                            <span class="badge" style="background: var(--lime-primary); color: var(--text-primary);">
-                                <i class="bi bi-crown-fill"></i> Dono
-                            </span>
-                        </div>
-                        <h5 class="room-card-title">{{ sala.nome }}</h5>
-                        <p class="room-card-description">
-                            <i class="bi bi-key-fill"></i> Grupo privado com senha
-                        </p>
-                        <div class="d-grid gap-2">
-                            <a href="{% url 'room' room_name=sala.nome %}" class="btn btn-modern" style="background: var(--bg-sidebar); color: white;">
-                                <i class="bi bi-box-arrow-in-right me-2"></i>
-                                Entrar
-                            </a>
-                            <button class="btn btn-outline-secondary btn-sm" onclick="copyInviteLink('{{ sala.token }}')">
-                                <i class="bi bi-link-45deg me-1"></i>
-                                Copiar Link de Convite
-                            </button>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="card-modern">
-                <div class="card-body text-center py-5">
-                    <i class="bi bi-shield-lock" style="font-size: 4rem; opacity: 0.2; color: var(--bg-sidebar);"></i>
-                    <h5 class="mt-3 text-muted">Você não tem grupos privados</h5>
-                    <p class="text-muted mb-4">Crie um grupo privado para conversas exclusivas</p>
-                    <a href="{% url 'criar_sala' %}" class="btn btn-modern" style="background: var(--lime-primary); color: var(--text-primary);">
-                        <i class="bi bi-plus-circle-fill me-2"></i>
-                        Criar Grupo Privado
-                    </a>
-                </div>
-            </div>
-        {% endif %}
-    </div>
+.section-title i {
+    font-size: 1.25rem;
+    color: var(--bg-sidebar);
+}
 
-    <!-- Grupos Privados Acessados -->
-    <div class="mb-4">
-        <div class="d-flex align-items-center justify-content-between mb-3">
-            <h3 class="mb-0" style="color: var(--bg-sidebar);">
-                <i class="bi bi-unlock-fill me-2"></i>
-                Grupos Privados Acessados
-            </h3>
-            <span class="badge badge-modern" style="background: var(--bg-chat); color: white;">
-                {{ salas_autorizadas|length }} grupos
-            </span>
-        </div>
+.section-title h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
 
-        {% if salas_autorizadas %}
-            <div class="rooms-grid">
-                {% for sala in salas_autorizadas %}
-                    <div class="room-card">
-                        <div class="room-card-icon" style="background: var(--bg-chat); color: white;">
-                            <i class="bi bi-unlock-fill"></i>
-                        </div>
-                        <h5 class="room-card-title">{{ sala.nome }}</h5>
-                        <p class="room-card-description">
-                            <i class="bi bi-person-fill"></i> Criado por <strong>{{ sala.dono.username }}</strong>
-                        </p>
-                        <a href="{% url 'room' room_name=sala.nome %}" class="btn btn-gradient-secondary w-100 btn-modern">
-                            <i class="bi bi-box-arrow-in-right me-2"></i>
-                            Entrar
-                        </a>
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="card-modern">
-                <div class="card-body text-center py-5">
-                    <i class="bi bi-unlock" style="font-size: 4rem; opacity: 0.2; color: var(--bg-sidebar);"></i>
-                    <h5 class="mt-3 text-muted">Nenhum grupo privado acessado</h5>
-                    <p class="text-muted mb-0">Você verá aqui os grupos privados que acessou via senha ou convite</p>
-                </div>
-            </div>
-        {% endif %}
-    </div>
-</div>
+.section-count {
+    background: var(--bg-secondary);
+    color: var(--text-muted);
+    padding: 0.25rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
 
-<script>
-    function copyInviteLink(token) {
-        const link = window.location.origin + '/chat/convite/' + token + '/';
-        navigator.clipboard.writeText(link).then(() => {
-            alert('Link de convite copiado: ' + link);
-        }).catch(err => {
-            console.error('Erro ao copiar:', err);
-        });
+/* Groups Grid */
+.groups-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+.group-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.group-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--lime-primary);
+}
+
+.group-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 14px;
+    background: var(--bg-sidebar);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.group-avatar.private {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+
+.group-avatar.authorized {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.group-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.group-info h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.group-info p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.group-enter {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--bg-secondary);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.group-card:hover .group-enter {
+    background: var(--lime-primary);
+    color: var(--bg-sidebar);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    background: var(--card-bg);
+    border: 1px dashed var(--border-color);
+    border-radius: 14px;
+}
+
+.empty-state.small {
+    padding: 2rem;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    color: var(--text-muted);
+    opacity: 0.3;
+    margin-bottom: 1rem;
+}
+
+.empty-state p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state small {
+    color: var(--text-muted);
+    opacity: 0.7;
+    font-size: 0.85rem;
+}
+
+/* Create Group CTA */
+.create-group-cta {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.create-group-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 2rem;
+    background: var(--lime-primary);
+    color: var(--bg-sidebar);
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.create-group-btn:hover {
+    background: var(--lime-secondary);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(200, 232, 67, 0.3);
+    color: var(--bg-sidebar);
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .groups-grid {
+        grid-template-columns: 1fr;
     }
-</script>
+
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}
+
+/* Tema Escuro */
+[data-theme="dark"] .group-card {
+    background: var(--bg-secondary);
+    border-color: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .empty-state {
+    background: var(--bg-secondary);
+    border-color: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .group-enter {
+    background: var(--bg-tertiary);
+}
+</style>
 {% endblock %}

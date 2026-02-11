@@ -1,199 +1,349 @@
 {% extends 'chat/base.html' %}
 
-{% block content %}
-<div class="auth-container">
-    <div class="auth-card fade-in">
-        <div class="auth-header">
-            <div class="auth-icon">
-                <i class="bi bi-person-plus"></i>
+{% block title %}Criar Conta - Dialogus{% endblock %}
+
+{% block public_content %}
+<div class="register-page">
+    <!-- Lado esquerdo - Branding -->
+    <div class="register-branding">
+        <div class="branding-content">
+            <div class="brand-icon">
+                <i class="bi bi-chat-dots-fill"></i>
             </div>
-            <h2>Criar sua conta</h2>
-            <p class="text-muted">Preencha os dados para começar</p>
+            <h1>Dialogus</h1>
+            <p>Junte-se a milhares de pessoas conectadas</p>
+
+            <div class="features-list">
+                <div class="feature-item">
+                    <i class="bi bi-person-plus-fill"></i>
+                    <span>Crie sua conta em segundos</span>
+                </div>
+                <div class="feature-item">
+                    <i class="bi bi-chat-heart-fill"></i>
+                    <span>Conecte-se com amigos</span>
+                </div>
+                <div class="feature-item">
+                    <i class="bi bi-globe"></i>
+                    <span>Participe de comunidades</span>
+                </div>
+            </div>
         </div>
+    </div>
 
-        <form method="post" class="auth-form" id="registerForm">
-            {% csrf_token %}
-
-            <div class="form-group">
-                <label for="{{ form.username.id_for_label }}" class="form-label">
-                    <i class="bi bi-person"></i> Nome de Usuário
-                </label>
-                <input
-                    type="text"
-                    name="{{ form.username.name }}"
-                    id="{{ form.username.id_for_label }}"
-                    class="form-control form-control-modern"
-                    placeholder="Escolha um nome de usuário"
-                    required
-                    autocomplete="username"
-                    {% if form.username.value %}value="{{ form.username.value }}"{% endif %}
-                >
-                {% if form.username.help_text %}
-                    <small class="form-text text-muted">{{ form.username.help_text }}</small>
-                {% endif %}
-                {% if form.username.errors %}
-                    <div class="invalid-feedback d-block">
-                        {{ form.username.errors }}
-                    </div>
-                {% endif %}
+    <!-- Lado direito - Formulário -->
+    <div class="register-form-side">
+        <div class="register-card fade-in">
+            <div class="register-header">
+                <h2>Criar sua conta</h2>
+                <p>Preencha os dados para começar</p>
             </div>
 
-            {% if form.email %}
-            <div class="form-group">
-                <label for="{{ form.email.id_for_label }}" class="form-label">
-                    <i class="bi bi-envelope"></i> Email
-                </label>
-                <input
-                    type="email"
-                    name="{{ form.email.name }}"
-                    id="{{ form.email.id_for_label }}"
-                    class="form-control form-control-modern"
-                    placeholder="seu@email.com"
-                    autocomplete="email"
-                    {% if form.email.value %}value="{{ form.email.value }}"{% endif %}
-                >
-                {% if form.email.help_text %}
-                    <small class="form-text text-muted">{{ form.email.help_text }}</small>
-                {% endif %}
-                {% if form.email.errors %}
-                    <div class="invalid-feedback d-block">
-                        {{ form.email.errors }}
-                    </div>
-                {% endif %}
-            </div>
-            {% endif %}
+            <form method="post" class="register-form" id="registerForm">
+                {% csrf_token %}
 
-            <div class="form-group">
-                <label for="{{ form.password1.id_for_label }}" class="form-label">
-                    <i class="bi bi-lock"></i> Senha
-                </label>
-                <div class="password-input-wrapper">
+                <div class="form-group">
+                    <label for="{{ form.username.id_for_label }}" class="form-label">
+                        <i class="bi bi-person-fill"></i> Nome de Usuário
+                    </label>
                     <input
-                        type="password"
-                        name="{{ form.password1.name }}"
-                        id="{{ form.password1.id_for_label }}"
+                        type="text"
+                        name="{{ form.username.name }}"
+                        id="{{ form.username.id_for_label }}"
                         class="form-control form-control-modern"
-                        placeholder="Crie uma senha forte"
+                        placeholder="Escolha um nome de usuário"
                         required
-                        autocomplete="new-password"
+                        autocomplete="username"
+                        {% if form.username.value %}value="{{ form.username.value }}"{% endif %}
                     >
-                    <button type="button" class="password-toggle" onclick="togglePassword('{{ form.password1.id_for_label }}')">
-                        <i class="bi bi-eye"></i>
-                    </button>
+                    {% if form.username.help_text %}
+                        <small class="form-text">{{ form.username.help_text }}</small>
+                    {% endif %}
+                    {% if form.username.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.username.errors }}
+                        </div>
+                    {% endif %}
                 </div>
+
+                {% if form.email %}
+                <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}" class="form-label">
+                        <i class="bi bi-envelope-fill"></i> Email
+                    </label>
+                    <input
+                        type="email"
+                        name="{{ form.email.name }}"
+                        id="{{ form.email.id_for_label }}"
+                        class="form-control form-control-modern"
+                        placeholder="seu@email.com"
+                        autocomplete="email"
+                        {% if form.email.value %}value="{{ form.email.value }}"{% endif %}
+                    >
+                    {% if form.email.help_text %}
+                        <small class="form-text">{{ form.email.help_text }}</small>
+                    {% endif %}
+                    {% if form.email.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.email.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <div class="form-row">
+                    <div class="form-group form-group-half">
+                        <label for="{{ form.password1.id_for_label }}" class="form-label">
+                            <i class="bi bi-lock-fill"></i> Senha
+                        </label>
+                        <div class="password-input-wrapper">
+                            <input
+                                type="password"
+                                name="{{ form.password1.name }}"
+                                id="{{ form.password1.id_for_label }}"
+                                class="form-control form-control-modern"
+                                placeholder="Crie uma senha"
+                                required
+                                autocomplete="new-password"
+                            >
+                            <button type="button" class="password-toggle" onclick="togglePassword('{{ form.password1.id_for_label }}')">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        {% if form.password1.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.password1.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group form-group-half">
+                        <label for="{{ form.password2.id_for_label }}" class="form-label">
+                            <i class="bi bi-shield-lock-fill"></i> Confirmar
+                        </label>
+                        <div class="password-input-wrapper">
+                            <input
+                                type="password"
+                                name="{{ form.password2.name }}"
+                                id="{{ form.password2.id_for_label }}"
+                                class="form-control form-control-modern"
+                                placeholder="Confirme a senha"
+                                required
+                                autocomplete="new-password"
+                            >
+                            <button type="button" class="password-toggle" onclick="togglePassword('{{ form.password2.id_for_label }}')">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        {% if form.password2.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.password2.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
                 {% if form.password1.help_text %}
-                    <small class="form-text text-muted">{{ form.password1.help_text }}</small>
+                    <small class="form-text password-hint">
+                        <i class="bi bi-info-circle"></i> {{ form.password1.help_text }}
+                    </small>
                 {% endif %}
-                {% if form.password1.errors %}
-                    <div class="invalid-feedback d-block">
-                        {{ form.password1.errors }}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger alert-modern">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        {{ form.non_field_errors }}
                     </div>
                 {% endif %}
+
+                <button type="submit" class="btn btn-register-submit w-100">
+                    <i class="bi bi-rocket-takeoff-fill"></i> Criar minha conta
+                </button>
+            </form>
+
+            <div class="register-divider">
+                <span>ou</span>
             </div>
 
-            <div class="form-group">
-                <label for="{{ form.password2.id_for_label }}" class="form-label">
-                    <i class="bi bi-lock-fill"></i> Confirmar Senha
-                </label>
-                <div class="password-input-wrapper">
-                    <input
-                        type="password"
-                        name="{{ form.password2.name }}"
-                        id="{{ form.password2.id_for_label }}"
-                        class="form-control form-control-modern"
-                        placeholder="Digite a senha novamente"
-                        required
-                        autocomplete="new-password"
-                    >
-                    <button type="button" class="password-toggle" onclick="togglePassword('{{ form.password2.id_for_label }}')">
-                        <i class="bi bi-eye"></i>
-                    </button>
-                </div>
-                {% if form.password2.help_text %}
-                    <small class="form-text text-muted">{{ form.password2.help_text }}</small>
-                {% endif %}
-                {% if form.password2.errors %}
-                    <div class="invalid-feedback d-block">
-                        {{ form.password2.errors }}
-                    </div>
-                {% endif %}
+            <div class="register-footer">
+                <p>Já tem uma conta?</p>
+                <a href="{% url 'login' %}" class="btn btn-login-link w-100">
+                    <i class="bi bi-box-arrow-in-right"></i> Fazer login
+                </a>
             </div>
-
-            {% if form.non_field_errors %}
-                <div class="alert alert-danger alert-modern">
-                    <i class="bi bi-exclamation-triangle"></i>
-                    {{ form.non_field_errors }}
-                </div>
-            {% endif %}
-
-            <button type="submit" class="btn btn-success btn-modern w-100">
-                <i class="bi bi-person-plus"></i> Criar Conta
-            </button>
-        </form>
-
-        <div class="auth-footer">
-            <p>Já tem uma conta? <a href="{% url 'login' %}" class="auth-link">Entre aqui</a></p>
         </div>
     </div>
 </div>
 
 <style>
-.auth-container {
-    min-height: calc(100vh - 120px);
+.register-page {
+    min-height: 100vh;
+    display: flex;
+    background: var(--bg-primary);
+}
+
+/* Lado esquerdo - Branding */
+.register-branding {
+    flex: 1;
+    background: linear-gradient(135deg, var(--bg-sidebar) 0%, var(--bg-sidebar-dark) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2rem 1rem;
-    background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+    padding: 3rem;
+    position: relative;
+    overflow: hidden;
 }
 
-.auth-card {
+.register-branding::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(200, 232, 67, 0.15) 0%, transparent 50%);
+    animation: pulse-bg 8s ease-in-out infinite;
+}
+
+.register-branding::after {
+    content: '';
+    position: absolute;
+    bottom: -30%;
+    left: -30%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(200, 232, 67, 0.1) 0%, transparent 40%);
+    animation: pulse-bg 6s ease-in-out infinite reverse;
+}
+
+@keyframes pulse-bg {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+.branding-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    color: white;
+    max-width: 400px;
+}
+
+.brand-icon {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 1.5rem;
+    background: var(--lime-primary);
+    border-radius: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: var(--bg-sidebar);
+    box-shadow: 0 12px 40px rgba(200, 232, 67, 0.3);
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.branding-content h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.5px;
+}
+
+.branding-content > p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 3rem;
+}
+
+.features-list {
+    text-align: left;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    margin-bottom: 0.75rem;
+    backdrop-filter: blur(10px);
+    transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.feature-item:hover {
+    transform: translateX(8px);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.feature-item i {
+    font-size: 1.5rem;
+    color: var(--lime-primary);
+}
+
+.feature-item span {
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+/* Lado direito - Formulário */
+.register-form-side {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: var(--bg-primary);
+}
+
+.register-card {
     background: var(--card-bg);
     border-radius: 24px;
     box-shadow: var(--shadow-xl);
-    padding: 3rem;
+    padding: 2.5rem;
     max-width: 480px;
     width: 100%;
-    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-color);
 }
 
-.auth-header {
+.register-header {
     text-align: center;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
 }
 
-.auth-icon {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 1.5rem;
-    background: linear-gradient(135deg, #10b981, #3b82f6);
-    border-radius: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2.5rem;
-    color: white;
-    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
-}
-
-.auth-header h2 {
+.register-header h2 {
     font-size: 1.75rem;
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: 0.5rem;
 }
 
-.auth-header p {
+.register-header p {
     font-size: 0.95rem;
     color: var(--text-muted);
 }
 
-.auth-form {
+.register-form {
     margin-bottom: 1.5rem;
 }
 
 .form-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.form-row {
+    display: flex;
+    gap: 1rem;
+}
+
+.form-group-half {
+    flex: 1;
 }
 
 .form-label {
@@ -201,16 +351,16 @@
     color: var(--text-primary);
     margin-bottom: 0.5rem;
     display: block;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
 }
 
 .form-label i {
     margin-right: 0.25rem;
-    color: #10b981;
+    color: var(--lime-primary);
 }
 
 .form-control-modern {
-    padding: 0.875rem 1rem;
+    padding: 0.75rem 1rem;
     border: 2px solid var(--border-color);
     border-radius: 12px;
     font-size: 0.95rem;
@@ -222,8 +372,8 @@
 
 .form-control-modern:focus {
     outline: none;
-    border-color: #10b981;
-    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+    border-color: var(--lime-primary);
+    box-shadow: 0 0 0 4px rgba(200, 232, 67, 0.15);
     background: var(--card-bg);
 }
 
@@ -245,50 +395,105 @@
 }
 
 .password-toggle:hover {
-    color: #10b981;
+    color: var(--lime-primary);
 }
 
-.btn-modern {
-    padding: 0.875rem 1.5rem;
+.form-text {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.password-hint {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.password-hint i {
+    color: var(--lime-primary);
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.btn-register-submit {
+    padding: 1rem 1.5rem;
     border-radius: 12px;
     font-weight: 600;
     font-size: 1rem;
     border: none;
+    background: var(--lime-primary);
+    color: var(--bg-sidebar);
     transition: all 0.3s ease;
-    margin-top: 1rem;
+    margin-top: 0.5rem;
 }
 
-.btn-modern i {
+.btn-register-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(200, 232, 67, 0.4);
+    background: var(--lime-secondary);
+    color: var(--bg-sidebar);
+}
+
+.btn-register-submit i {
     margin-right: 0.5rem;
 }
 
-.btn-modern:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+.register-divider {
+    display: flex;
+    align-items: center;
+    margin: 1.5rem 0;
 }
 
-.auth-footer {
+.register-divider::before,
+.register-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-color);
+}
+
+.register-divider span {
+    padding: 0 1rem;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.register-footer {
     text-align: center;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--border-color);
 }
 
-.auth-footer p {
-    margin: 0;
+.register-footer p {
+    margin-bottom: 1rem;
     color: var(--text-muted);
     font-size: 0.95rem;
 }
 
-.auth-link {
-    color: #10b981;
-    text-decoration: none;
+.btn-login-link {
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
     font-weight: 600;
-    transition: color 0.3s;
+    font-size: 1rem;
+    border: 2px solid var(--bg-sidebar);
+    background: transparent;
+    color: var(--bg-sidebar);
+    transition: all 0.3s ease;
 }
 
-.auth-link:hover {
-    color: #3b82f6;
-    text-decoration: underline;
+.btn-login-link:hover {
+    background: var(--bg-sidebar);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(47, 61, 122, 0.3);
+}
+
+.btn-login-link i {
+    margin-right: 0.5rem;
 }
 
 .alert-modern {
@@ -301,27 +506,88 @@
     gap: 0.5rem;
 }
 
-.form-text {
-    display: block;
-    margin-top: 0.5rem;
-    font-size: 0.875rem;
-    color: var(--text-muted);
-}
-
-@media (max-width: 576px) {
-    .auth-card {
-        padding: 2rem 1.5rem;
+/* Responsivo */
+@media (max-width: 992px) {
+    .register-page {
+        flex-direction: column;
     }
 
-    .auth-icon {
-        width: 64px;
-        height: 64px;
+    .register-branding {
+        padding: 2rem;
+        min-height: auto;
+    }
+
+    .branding-content h1 {
         font-size: 2rem;
     }
 
-    .auth-header h2 {
+    .features-list {
+        display: none;
+    }
+
+    .brand-icon {
+        width: 80px;
+        height: 80px;
+        font-size: 2.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .register-form-side {
+        padding: 1rem;
+    }
+
+    .register-card {
+        padding: 2rem 1.5rem;
+        border-radius: 20px;
+    }
+
+    .register-header h2 {
         font-size: 1.5rem;
     }
+
+    .branding-content > p {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+}
+
+/* Tema escuro ajustes */
+[data-theme="dark"] .register-form-side {
+    background: var(--bg-primary);
+}
+
+[data-theme="dark"] .register-card {
+    background: var(--bg-secondary);
+    border-color: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .form-control-modern {
+    background: var(--bg-tertiary);
+    border-color: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .form-control-modern:focus {
+    background: var(--bg-secondary);
+    border-color: var(--lime-primary);
+}
+
+[data-theme="dark"] .password-hint {
+    background: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .btn-login-link {
+    color: var(--text-primary);
+    border-color: var(--lime-primary);
+}
+
+[data-theme="dark"] .btn-login-link:hover {
+    background: var(--lime-primary);
+    color: var(--bg-sidebar);
 }
 </style>
 

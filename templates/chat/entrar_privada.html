@@ -1,5 +1,41 @@
 {% extends 'chat/base.html' %}
 
+{% block title %}Entrar em Grupo Privado - Dialogus{% endblock %}
+
+{% block sidebar_title %}Grupo Privado{% endblock %}
+
+{% block sidebar_content %}
+<a href="{% url 'index' %}" class="conversation-item">
+    <div class="conversation-avatar">
+        <i class="bi bi-house-fill"></i>
+    </div>
+    <div class="conversation-info">
+        <div class="conversation-name">Início</div>
+        <div class="conversation-preview">Voltar para o início</div>
+    </div>
+</a>
+
+<a href="{% url 'salas' %}" class="conversation-item">
+    <div class="conversation-avatar group">
+        <i class="bi bi-people-fill"></i>
+    </div>
+    <div class="conversation-info">
+        <div class="conversation-name">Explorar Grupos</div>
+        <div class="conversation-preview">Ver todos os grupos</div>
+    </div>
+</a>
+
+<a href="{% url 'criar_sala' %}" class="conversation-item">
+    <div class="conversation-avatar" style="background: linear-gradient(135deg, #10b981, #059669);">
+        <i class="bi bi-plus-circle-fill"></i>
+    </div>
+    <div class="conversation-info">
+        <div class="conversation-name">Criar Grupo</div>
+        <div class="conversation-preview">Novo grupo de conversa</div>
+    </div>
+</a>
+{% endblock %}
+
 {% block content %}
 <div class="form-container">
     <div class="form-card fade-in">

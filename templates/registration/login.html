@@ -1,134 +1,262 @@
 {% extends 'chat/base.html' %}
 
-{% block content %}
-<div class="auth-container">
-    <div class="auth-card fade-in">
-        <div class="auth-header">
-            <div class="auth-icon">
-                <i class="bi bi-box-arrow-in-right"></i>
+{% block title %}Entrar - Dialogus{% endblock %}
+
+{% block public_content %}
+<div class="login-page">
+    <!-- Lado esquerdo - Branding -->
+    <div class="login-branding">
+        <div class="branding-content">
+            <div class="brand-icon">
+                <i class="bi bi-chat-dots-fill"></i>
             </div>
-            <h2>Bem-vindo de volta!</h2>
-            <p class="text-muted">Entre com suas credenciais para continuar</p>
+            <h1>Dialogus</h1>
+            <p>Conecte-se com amigos e grupos em tempo real</p>
+
+            <div class="features-list">
+                <div class="feature-item">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                    <span>Mensagens instantâneas</span>
+                </div>
+                <div class="feature-item">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Grupos públicos e privados</span>
+                </div>
+                <div class="feature-item">
+                    <i class="bi bi-shield-lock-fill"></i>
+                    <span>Conversas seguras</span>
+                </div>
+            </div>
         </div>
+    </div>
 
-        <form method="post" class="auth-form" id="loginForm">
-            {% csrf_token %}
-
-            <div class="form-group">
-                <label for="{{ form.username.id_for_label }}" class="form-label">
-                    <i class="bi bi-person"></i> Usuário
-                </label>
-                <input
-                    type="text"
-                    name="{{ form.username.name }}"
-                    id="{{ form.username.id_for_label }}"
-                    class="form-control form-control-modern"
-                    placeholder="Digite seu nome de usuário"
-                    required
-                    autocomplete="username"
-                >
-                {% if form.username.errors %}
-                    <div class="invalid-feedback d-block">
-                        {{ form.username.errors }}
-                    </div>
-                {% endif %}
+    <!-- Lado direito - Formulário -->
+    <div class="login-form-side">
+        <div class="login-card fade-in">
+            <div class="login-header">
+                <h2>Bem-vindo de volta!</h2>
+                <p>Entre com suas credenciais para continuar</p>
             </div>
 
-            <div class="form-group">
-                <label for="{{ form.password.id_for_label }}" class="form-label">
-                    <i class="bi bi-lock"></i> Senha
-                </label>
-                <div class="password-input-wrapper">
+            <form method="post" class="login-form" id="loginForm">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label for="{{ form.username.id_for_label }}" class="form-label">
+                        <i class="bi bi-person-fill"></i> Usuário
+                    </label>
                     <input
-                        type="password"
-                        name="{{ form.password.name }}"
-                        id="{{ form.password.id_for_label }}"
+                        type="text"
+                        name="{{ form.username.name }}"
+                        id="{{ form.username.id_for_label }}"
                         class="form-control form-control-modern"
-                        placeholder="Digite sua senha"
+                        placeholder="Digite seu nome de usuário"
                         required
-                        autocomplete="current-password"
+                        autocomplete="username"
                     >
-                    <button type="button" class="password-toggle" onclick="togglePassword('{{ form.password.id_for_label }}')">
-                        <i class="bi bi-eye"></i>
-                    </button>
+                    {% if form.username.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.username.errors }}
+                        </div>
+                    {% endif %}
                 </div>
-                {% if form.password.errors %}
-                    <div class="invalid-feedback d-block">
-                        {{ form.password.errors }}
+
+                <div class="form-group">
+                    <label for="{{ form.password.id_for_label }}" class="form-label">
+                        <i class="bi bi-lock-fill"></i> Senha
+                    </label>
+                    <div class="password-input-wrapper">
+                        <input
+                            type="password"
+                            name="{{ form.password.name }}"
+                            id="{{ form.password.id_for_label }}"
+                            class="form-control form-control-modern"
+                            placeholder="Digite sua senha"
+                            required
+                            autocomplete="current-password"
+                        >
+                        <button type="button" class="password-toggle" onclick="togglePassword('{{ form.password.id_for_label }}')">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    {% if form.password.errors %}
+                        <div class="invalid-feedback d-block">
+                            {{ form.password.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger alert-modern">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        {{ form.non_field_errors }}
                     </div>
                 {% endif %}
+
+                <button type="submit" class="btn btn-login w-100">
+                    <i class="bi bi-box-arrow-in-right"></i> Entrar
+                </button>
+            </form>
+
+            <div class="login-divider">
+                <span>ou</span>
             </div>
 
-            {% if form.non_field_errors %}
-                <div class="alert alert-danger alert-modern">
-                    <i class="bi bi-exclamation-triangle"></i>
-                    {{ form.non_field_errors }}
-                </div>
-            {% endif %}
-
-            <button type="submit" class="btn btn-primary btn-modern w-100">
-                <i class="bi bi-box-arrow-in-right"></i> Entrar
-            </button>
-        </form>
-
-        <div class="auth-footer">
-            <p>Ainda não tem uma conta? <a href="{% url 'register' %}" class="auth-link">Crie uma agora</a></p>
+            <div class="login-footer">
+                <p>Ainda não tem uma conta?</p>
+                <a href="{% url 'register' %}" class="btn btn-register w-100">
+                    <i class="bi bi-person-plus-fill"></i> Criar conta grátis
+                </a>
+            </div>
         </div>
     </div>
 </div>
 
 <style>
-.auth-container {
-    min-height: calc(100vh - 120px);
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    background: var(--bg-primary);
+}
+
+/* Lado esquerdo - Branding */
+.login-branding {
+    flex: 1;
+    background: var(--bg-sidebar);
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2rem 1rem;
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    padding: 3rem;
+    position: relative;
+    overflow: hidden;
 }
 
-.auth-card {
+.login-branding::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(200, 232, 67, 0.1) 0%, transparent 50%);
+    animation: pulse-bg 8s ease-in-out infinite;
+}
+
+@keyframes pulse-bg {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+.branding-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    color: white;
+    max-width: 400px;
+}
+
+.brand-icon {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 1.5rem;
+    background: var(--lime-primary);
+    border-radius: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    color: var(--bg-sidebar);
+    box-shadow: 0 12px 40px rgba(200, 232, 67, 0.3);
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.branding-content h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.5px;
+}
+
+.branding-content > p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 3rem;
+}
+
+.features-list {
+    text-align: left;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    margin-bottom: 0.75rem;
+    backdrop-filter: blur(10px);
+    transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.feature-item:hover {
+    transform: translateX(8px);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.feature-item i {
+    font-size: 1.5rem;
+    color: var(--lime-primary);
+}
+
+.feature-item span {
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+/* Lado direito - Formulário */
+.login-form-side {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: var(--bg-primary);
+}
+
+.login-card {
     background: var(--card-bg);
     border-radius: 24px;
     box-shadow: var(--shadow-xl);
     padding: 3rem;
-    max-width: 480px;
+    max-width: 440px;
     width: 100%;
-    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-color);
 }
 
-.auth-header {
+.login-header {
     text-align: center;
     margin-bottom: 2rem;
 }
 
-.auth-icon {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 1.5rem;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    border-radius: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2.5rem;
-    color: white;
-    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
-}
-
-.auth-header h2 {
+.login-header h2 {
     font-size: 1.75rem;
     font-weight: 700;
     color: var(--text-primary);
     margin-bottom: 0.5rem;
 }
 
-.auth-header p {
+.login-header p {
     font-size: 0.95rem;
     color: var(--text-muted);
 }
 
-.auth-form {
+.login-form {
     margin-bottom: 1.5rem;
 }
 
@@ -146,7 +274,7 @@
 
 .form-label i {
     margin-right: 0.25rem;
-    color: var(--primary-color);
+    color: var(--bg-sidebar);
 }
 
 .form-control-modern {
@@ -157,12 +285,13 @@
     transition: all 0.3s ease;
     background: var(--input-bg);
     color: var(--text-primary);
+    width: 100%;
 }
 
 .form-control-modern:focus {
     outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    border-color: var(--bg-sidebar);
+    box-shadow: 0 0 0 4px rgba(47, 61, 122, 0.1);
     background: var(--card-bg);
 }
 
@@ -184,50 +313,82 @@
 }
 
 .password-toggle:hover {
-    color: var(--primary-color);
+    color: var(--bg-sidebar);
 }
 
-.btn-modern {
-    padding: 0.875rem 1.5rem;
+.btn-login {
+    padding: 1rem 1.5rem;
     border-radius: 12px;
     font-weight: 600;
     font-size: 1rem;
     border: none;
+    background: var(--bg-sidebar);
+    color: white;
     transition: all 0.3s ease;
-    margin-top: 1rem;
+    margin-top: 0.5rem;
 }
 
-.btn-modern i {
+.btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(47, 61, 122, 0.3);
+    background: var(--bg-sidebar-dark);
+    color: white;
+}
+
+.btn-login i {
     margin-right: 0.5rem;
 }
 
-.btn-modern:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+.login-divider {
+    display: flex;
+    align-items: center;
+    margin: 1.5rem 0;
 }
 
-.auth-footer {
+.login-divider::before,
+.login-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-color);
+}
+
+.login-divider span {
+    padding: 0 1rem;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.login-footer {
     text-align: center;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--border-color);
 }
 
-.auth-footer p {
-    margin: 0;
+.login-footer p {
+    margin-bottom: 1rem;
     color: var(--text-muted);
     font-size: 0.95rem;
 }
 
-.auth-link {
-    color: var(--primary-color);
-    text-decoration: none;
+.btn-register {
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
     font-weight: 600;
-    transition: color 0.3s;
+    font-size: 1rem;
+    border: 2px solid var(--lime-primary);
+    background: transparent;
+    color: var(--text-primary);
+    transition: all 0.3s ease;
 }
 
-.auth-link:hover {
-    color: var(--secondary-color);
-    text-decoration: underline;
+.btn-register:hover {
+    background: var(--lime-primary);
+    color: var(--bg-sidebar);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(200, 232, 67, 0.3);
+}
+
+.btn-register i {
+    margin-right: 0.5rem;
 }
 
 .alert-modern {
@@ -240,20 +401,73 @@
     gap: 0.5rem;
 }
 
-@media (max-width: 576px) {
-    .auth-card {
-        padding: 2rem 1.5rem;
+/* Responsivo */
+@media (max-width: 992px) {
+    .login-page {
+        flex-direction: column;
     }
 
-    .auth-icon {
-        width: 64px;
-        height: 64px;
+    .login-branding {
+        padding: 2rem;
+        min-height: auto;
+    }
+
+    .branding-content h1 {
         font-size: 2rem;
     }
 
-    .auth-header h2 {
+    .features-list {
+        display: none;
+    }
+
+    .brand-icon {
+        width: 80px;
+        height: 80px;
+        font-size: 2.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .login-form-side {
+        padding: 1rem;
+    }
+
+    .login-card {
+        padding: 2rem 1.5rem;
+        border-radius: 20px;
+    }
+
+    .login-header h2 {
         font-size: 1.5rem;
     }
+
+    .branding-content > p {
+        margin-bottom: 1.5rem;
+    }
+}
+
+/* Tema escuro ajustes */
+[data-theme="dark"] .login-form-side {
+    background: var(--bg-primary);
+}
+
+[data-theme="dark"] .login-card {
+    background: var(--bg-secondary);
+    border-color: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .form-control-modern {
+    background: var(--bg-tertiary);
+    border-color: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .form-control-modern:focus {
+    background: var(--bg-secondary);
+    border-color: var(--lime-primary);
+}
+
+[data-theme="dark"] .btn-register {
+    color: var(--text-primary);
 }
 </style>
 
@@ -274,4 +488,4 @@ function togglePassword(fieldId) {
     }
 }
 </script>
-{% endblock %}
+{% endblock public_content %}
