@@ -51,7 +51,6 @@
 <div class="profile-page fade-in">
     <!-- Header do Perfil -->
     <div class="profile-hero">
-        <div class="profile-hero-bg"></div>
         <div class="profile-hero-content">
             <div class="profile-hero-left">
                 <div class="profile-avatar-wrapper">
@@ -204,29 +203,7 @@
 .profile-hero {
     position: relative;
     padding: 2.5rem 2rem;
-    overflow: hidden;
-}
-
-.profile-hero-bg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-}
-
-.profile-hero-bg::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-}
-
-@keyframes pulse-hero {
-    0%, 100% { transform: scale(1); opacity: 0.5; }
-    50% { transform: scale(1.1); opacity: 0.8; }
+    border-bottom: 1px solid var(--border-color);
 }
 
 .profile-hero-content {
@@ -255,8 +232,8 @@
     width: 110px;
     height: 110px;
     border-radius: 50%;
-    border: 4px solid var(--lime-primary);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    border: 4px solid var(--bg-sidebar);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     object-fit: cover;
 }
 
@@ -292,14 +269,14 @@
 }
 
 .profile-username {
-    color: white;
+    color: var(--text-primary);
     font-size: 1.75rem;
     font-weight: 700;
     margin-bottom: 0.25rem;
 }
 
 .profile-status-text {
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--text-muted);
     font-size: 0.95rem;
     display: flex;
     align-items: center;
@@ -308,7 +285,7 @@
 }
 
 .profile-status-text i {
-    color: var(--lime-primary);
+    color: var(--bg-sidebar);
 }
 
 .profile-status-empty {
@@ -326,10 +303,11 @@
     display: flex;
     align-items: center;
     gap: 0.75rem;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--card-bg);
     padding: 0.75rem 1.25rem;
     border-radius: 12px;
-    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.08));
 }
 
 .meta-icon {
@@ -351,7 +329,7 @@
 
 .meta-label {
     font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -359,7 +337,7 @@
 .meta-value {
     font-size: 1rem;
     font-weight: 700;
-    color: white;
+    color: var(--text-primary);
 }
 
 /* Content Section */
