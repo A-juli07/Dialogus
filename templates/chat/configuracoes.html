@@ -1358,6 +1358,11 @@ function setWallpaper(wallpaper) {
     });
     document.querySelector(`.wallpaper-option[data-wallpaper="${wallpaper}"]`).classList.add('active');
     localStorage.setItem('wallpaper', wallpaper);
+
+    // Aplicar imediatamente
+    if (typeof applyWallpaper === 'function') {
+        applyWallpaper(wallpaper);
+    }
 }
 
 // Definir tamanho da fonte
@@ -1392,10 +1397,19 @@ document.getElementById('searchSettings').addEventListener('input', function(e) 
 
 // Inicializar tema selecionado
 document.addEventListener('DOMContentLoaded', function() {
+    // Restaurar tema selecionado
     const savedTheme = localStorage.getItem('theme') || 'light';
     const themeOption = document.querySelector(`.theme-option[data-theme="${savedTheme}"]`);
     if (themeOption) {
         themeOption.classList.add('active');
+    }
+
+    // Restaurar wallpaper selecionado
+    const savedWallpaper = localStorage.getItem('wallpaper') || 'default';
+    document.querySelectorAll('.wallpaper-option').forEach(opt => opt.classList.remove('active'));
+    const wallpaperOption = document.querySelector(`.wallpaper-option[data-wallpaper="${savedWallpaper}"]`);
+    if (wallpaperOption) {
+        wallpaperOption.classList.add('active');
     }
 });
 

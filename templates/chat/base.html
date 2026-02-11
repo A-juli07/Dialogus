@@ -647,10 +647,21 @@
             applyTheme(newTheme);
         }
 
-        // Carregar tema salvo ao iniciar
+        // Aplicar papel de parede salvo
+        function applyWallpaper(wallpaper) {
+            document.documentElement.removeAttribute('data-wallpaper');
+            if (wallpaper && wallpaper !== 'default') {
+                document.documentElement.setAttribute('data-wallpaper', wallpaper);
+            }
+        }
+
+        // Carregar tema e wallpaper salvos ao iniciar
         document.addEventListener('DOMContentLoaded', function() {
             const savedTheme = localStorage.getItem('dialogus-theme') || 'light';
             applyTheme(savedTheme);
+
+            const savedWallpaper = localStorage.getItem('wallpaper') || 'default';
+            applyWallpaper(savedWallpaper);
 
             // Busca na sidebar
             const searchInput = document.getElementById('searchInput');
