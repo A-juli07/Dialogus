@@ -539,6 +539,38 @@ body {
     width: 100%;
 }
 
+/* Notificações - cores por tipo */
+.notification-success {
+    background: #10b981 !important;
+    color: #ffffff !important;
+}
+
+.notification-error {
+    background: #ef4444 !important;
+    color: #ffffff !important;
+}
+
+.notification-warning {
+    background: #f59e0b !important;
+    color: #ffffff !important;
+}
+
+.notification-info {
+    background: #3b82f6 !important;
+    color: #ffffff !important;
+}
+
+.notification-success i,
+.notification-error i,
+.notification-warning i,
+.notification-info i,
+.notification-success span,
+.notification-error span,
+.notification-warning span,
+.notification-info span {
+    color: #ffffff !important;
+}
+
 @keyframes pulse {
     0%, 100% {
         transform: scale(1);

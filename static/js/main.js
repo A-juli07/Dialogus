@@ -102,18 +102,29 @@ class NotificationManager {
             </div>
         `;
 
-        // Estilos inline (caso não estejam no CSS)
+        // Cores por tipo
+        const colors = {
+            success: { bg: '#10b981', color: '#ffffff' },
+            error: { bg: '#ef4444', color: '#ffffff' },
+            warning: { bg: '#f59e0b', color: '#ffffff' },
+            info: { bg: '#3b82f6', color: '#ffffff' }
+        };
+        const scheme = colors[type] || colors.info;
+
+        // Estilos inline
         notification.style.cssText = `
             position: fixed;
             top: 20px;
             right: 20px;
-            background: white;
+            background: ${scheme.bg};
+            color: ${scheme.color};
             padding: 1rem 1.5rem;
             border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
             z-index: 9999;
             animation: slideInRight 0.3s ease;
             max-width: 300px;
+            font-weight: 500;
         `;
 
         document.body.appendChild(notification);
