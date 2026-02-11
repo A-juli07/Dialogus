@@ -39,342 +39,278 @@
 {% endblock %}
 
 {% block content %}
-<div class="form-container">
-    <div class="form-card fade-in">
-        <div class="form-header">
-            <div class="form-icon">
-                <i class="bi bi-people"></i>
+<div class="create-group-page">
+    <div class="create-group-container fade-in">
+        <!-- Ícone do grupo -->
+        <div class="group-icon-header">
+            <div class="group-icon-circle">
+                <i class="bi bi-people-fill"></i>
             </div>
-            <h2>Criar novo grupo</h2>
-            <p class="text-muted">Preencha as informações para criar seu grupo</p>
+            <h2>Novo Grupo</h2>
         </div>
 
-        <div class="form-content-wrapper">
-            <form method="post" class="modern-form" id="createRoomForm">
+        <form method="post" id="createRoomForm">
             {% csrf_token %}
 
-            <div class="form-group">
-                <label for="{{ form.nome.id_for_label }}" class="form-label">
+            <!-- Nome do Grupo -->
+            <div class="cg-field">
+                <label for="{{ form.nome.id_for_label }}" class="cg-label">
                     <i class="bi bi-chat-text"></i> Nome do Grupo
                 </label>
                 <input
                     type="text"
                     name="{{ form.nome.name }}"
                     id="{{ form.nome.id_for_label }}"
-                    class="form-control form-control-modern"
+                    class="cg-input"
                     placeholder="Digite o nome do grupo"
                     required
                     maxlength="100"
                     {% if form.nome.value %}value="{{ form.nome.value }}"{% endif %}
                 >
-                {% if form.nome.help_text %}
-                    <small class="form-text text-muted">{{ form.nome.help_text }}</small>
-                {% endif %}
                 {% if form.nome.errors %}
-                    <div class="invalid-feedback d-block">
-                        {{ form.nome.errors }}
-                    </div>
+                    <div class="cg-error">{{ form.nome.errors }}</div>
                 {% endif %}
             </div>
 
-            <div class="form-group">
-                <label for="{{ form.descricao.id_for_label }}" class="form-label">
-                    <i class="bi bi-card-text"></i> Descrição
+            <!-- Descrição -->
+            <div class="cg-field">
+                <label for="{{ form.descricao.id_for_label }}" class="cg-label">
+                    <i class="bi bi-card-text"></i> Descrição <span class="cg-optional">(opcional)</span>
                 </label>
                 <textarea
                     name="{{ form.descricao.name }}"
                     id="{{ form.descricao.id_for_label }}"
-                    class="form-control form-control-modern"
-                    placeholder="Descreva sobre o que é o grupo (opcional)"
+                    class="cg-input cg-textarea"
+                    placeholder="Sobre o que é o grupo?"
                     rows="3"
                     maxlength="500"
                 >{% if form.descricao.value %}{{ form.descricao.value }}{% endif %}</textarea>
-                <div class="char-counter">
-                    <span id="charCount">0</span>/500 caracteres
-                </div>
-                {% if form.descricao.help_text %}
-                    <small class="form-text text-muted">{{ form.descricao.help_text }}</small>
-                {% endif %}
+                <div class="cg-counter"><span id="charCount">0</span>/500</div>
                 {% if form.descricao.errors %}
-                    <div class="invalid-feedback d-block">
-                        {{ form.descricao.errors }}
-                    </div>
+                    <div class="cg-error">{{ form.descricao.errors }}</div>
                 {% endif %}
             </div>
 
-            <div class="form-group">
-                <label class="form-label">
-                    <i class="bi bi-shield-lock"></i> Privacidade do Grupo
+            <!-- Privacidade -->
+            <div class="cg-field">
+                <label class="cg-label">
+                    <i class="bi bi-shield-lock"></i> Privacidade
                 </label>
                 <input type="hidden" name="{{ form.privada.name }}" id="{{ form.privada.id_for_label }}" value="{% if form.privada.value %}on{% endif %}">
-                <div class="privacy-options">
-                    <div class="privacy-option" id="publicOption">
-                        <div class="privacy-card">
-                            <i class="bi bi-globe"></i>
-                            <div>
-                                <strong>Público</strong>
-                                <small>Qualquer pessoa pode entrar</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="privacy-option" id="privateOption">
-                        <div class="privacy-card">
-                            <i class="bi bi-lock"></i>
-                            <div>
-                                <strong>Privado</strong>
-                                <small>Apenas com senha</small>
-                            </div>
-                        </div>
-                    </div>
+                <div class="cg-privacy-toggle">
+                    <button type="button" class="cg-pill" id="publicOption">
+                        <i class="bi bi-globe"></i> Público
+                    </button>
+                    <button type="button" class="cg-pill" id="privateOption">
+                        <i class="bi bi-lock"></i> Privado
+                    </button>
                 </div>
                 {% if form.privada.errors %}
-                    <div class="invalid-feedback d-block">
-                        {{ form.privada.errors }}
-                    </div>
+                    <div class="cg-error">{{ form.privada.errors }}</div>
                 {% endif %}
             </div>
 
-            <div id="passwordField" class="form-group" style="display: none;">
-                <label for="{{ form.senha.id_for_label }}" class="form-label">
+            <!-- Senha (aparece quando privado) -->
+            <div id="passwordField" class="cg-field cg-password-field" style="display: none;">
+                <label for="{{ form.senha.id_for_label }}" class="cg-label">
                     <i class="bi bi-key"></i> Senha do Grupo
                 </label>
-                <div class="password-input-wrapper">
+                <div class="cg-password-wrapper">
                     <input
                         type="password"
                         name="{{ form.senha.name }}"
                         id="{{ form.senha.id_for_label }}"
-                        class="form-control form-control-modern"
-                        placeholder="Defina uma senha para o grupo"
+                        class="cg-input"
+                        placeholder="Defina uma senha"
                         {% if form.senha.value %}value="{{ form.senha.value }}"{% endif %}
                     >
-                    <button type="button" class="password-toggle" onclick="togglePassword('{{ form.senha.id_for_label }}')">
+                    <button type="button" class="cg-password-toggle" onclick="togglePassword('{{ form.senha.id_for_label }}')">
                         <i class="bi bi-eye"></i>
                     </button>
                 </div>
-                {% if form.senha.help_text %}
-                    <small class="form-text text-muted">{{ form.senha.help_text }}</small>
-                {% endif %}
                 {% if form.senha.errors %}
-                    <div class="invalid-feedback d-block">
-                        {{ form.senha.errors }}
-                    </div>
+                    <div class="cg-error">{{ form.senha.errors }}</div>
                 {% endif %}
             </div>
 
             {% if form.non_field_errors %}
-                <div class="alert alert-danger alert-modern">
+                <div class="cg-alert">
                     <i class="bi bi-exclamation-triangle"></i>
                     {{ form.non_field_errors }}
                 </div>
             {% endif %}
 
-            <div class="form-actions">
-                <button type="submit" class="btn btn-success btn-modern">
+            <!-- Ações -->
+            <div class="cg-actions">
+                <button type="submit" class="cg-btn-create">
                     <i class="bi bi-plus-circle"></i> Criar Grupo
                 </button>
-                <a href="{% url 'salas' %}" class="btn btn-outline-secondary btn-modern">
-                    <i class="bi bi-arrow-left"></i> Voltar
-                </a>
+                <a href="{% url 'salas' %}" class="cg-btn-cancel">Cancelar</a>
             </div>
         </form>
-
-        <div class="preview-section">
-            <h6><i class="bi bi-eye"></i> Pré-visualização</h6>
-            <div class="group-preview-card">
-                <div class="preview-header">
-                    <div class="preview-icon">
-                        <i class="bi bi-people-fill"></i>
-                    </div>
-                    <div class="preview-info">
-                        <h5 id="previewName">Nome do Grupo</h5>
-                        <p id="previewDesc">Sem descrição</p>
-                    </div>
-                </div>
-                <div class="preview-meta">
-                    <span id="previewPrivacy" class="badge-public">
-                        <i class="bi bi-globe"></i> Público
-                    </span>
-                    <span class="badge-members">
-                        <i class="bi bi-person"></i> Você
-                    </span>
-                </div>
-            </div>
-        </div>
-        </div>
     </div>
 </div>
 
 <style>
-.form-container {
-    min-height: calc(100vh - 70px);
-    padding: 2rem 1rem;
+.create-group-page {
     display: flex;
-    align-items: center;
     justify-content: center;
+    padding: 2rem 1rem;
 }
 
-.form-card {
-    background: var(--card-bg);
-    border-radius: 24px;
-    box-shadow: var(--shadow-xl);
-    padding: 3rem;
-    max-width: 900px;
+.create-group-container {
+    max-width: 500px;
     width: 100%;
-    margin: 0 auto;
 }
 
-.form-content-wrapper {
-    display: grid;
-    grid-template-columns: 1fr 400px;
-    gap: 3rem;
-}
-
-.form-header {
+/* Header com ícone */
+.group-icon-header {
     text-align: center;
     margin-bottom: 2rem;
-    grid-column: 1 / -1;
 }
 
-.form-icon {
+.group-icon-circle {
     width: 80px;
     height: 80px;
-    margin: 0 auto 1.5rem;
+    margin: 0 auto 1rem;
     background: linear-gradient(135deg, #10b981, #059669);
-    border-radius: 20px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2.5rem;
+    font-size: 2.25rem;
     color: white;
-    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
 }
 
-.form-header h2 {
-    font-size: 1.75rem;
+.group-icon-header h2 {
+    font-size: 1.5rem;
     font-weight: 700;
     color: var(--text-primary);
-    margin-bottom: 0.5rem;
+    margin: 0;
 }
 
-.form-header p {
-    font-size: 0.95rem;
-    color: var(--text-muted);
+/* Campos */
+.cg-field {
+    margin-bottom: 1.25rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border-color);
 }
 
-.modern-form {
-    margin-bottom: 0;
+.cg-field:last-of-type {
+    border-bottom: none;
 }
 
-.form-group {
-    margin-bottom: 1.5rem;
-}
-
-.form-label {
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
+.cg-label {
     display: block;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
 }
 
-.form-label i {
-    margin-right: 0.25rem;
+.cg-label i {
     color: #10b981;
+    margin-right: 0.25rem;
 }
 
-.form-control-modern {
-    padding: 0.875rem 1rem;
-    border: 2px solid var(--border-color);
-    border-radius: 12px;
-    font-size: 0.95rem;
-    transition: all 0.3s ease;
-    background: var(--input-bg);
-    color: var(--text-primary);
+.cg-optional {
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.cg-input {
     width: 100%;
-}
-
-.form-control-modern:focus {
+    padding: 0.75rem 0;
+    border: none;
+    border-bottom: 2px solid var(--border-color);
+    font-size: 1rem;
+    color: var(--text-primary);
+    background: transparent;
+    transition: border-color 0.3s ease;
     outline: none;
-    border-color: #10b981;
-    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
-    background: var(--card-bg);
 }
 
-textarea.form-control-modern {
+.cg-input:focus {
+    border-bottom-color: #10b981;
+}
+
+.cg-input::placeholder {
+    color: var(--text-muted);
+    opacity: 0.6;
+}
+
+.cg-textarea {
     resize: vertical;
-    min-height: 80px;
+    min-height: 70px;
+    border-bottom: 2px solid var(--border-color);
 }
 
-.char-counter {
+.cg-counter {
     text-align: right;
-    font-size: 0.875rem;
+    font-size: 0.8rem;
     color: var(--text-muted);
     margin-top: 0.25rem;
 }
 
-.privacy-options {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
+/* Privacy toggle */
+.cg-privacy-toggle {
+    display: flex;
+    gap: 0.5rem;
 }
 
-.privacy-option {
+.cg-pill {
+    flex: 1;
+    padding: 0.625rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 600;
     cursor: pointer;
-    margin: 0;
-}
-
-.privacy-option input[type="radio"] {
-    display: none;
-}
-
-.privacy-card {
+    transition: all 0.25s ease;
     display: flex;
     align-items: center;
-    gap: 1rem;
-    padding: 1rem;
-    border: 2px solid var(--border-color);
-    border-radius: 12px;
-    background: var(--input-bg);
-    transition: all 0.3s ease;
+    justify-content: center;
+    gap: 0.4rem;
 }
 
-.privacy-card i {
-    font-size: 1.5rem;
-    color: var(--text-muted);
-}
-
-.privacy-card strong {
-    display: block;
+.cg-pill:hover {
+    border-color: #10b981;
     color: var(--text-primary);
-    font-size: 0.95rem;
 }
 
-.privacy-card small {
-    color: var(--text-muted);
-    font-size: 0.8rem;
-}
-
-.privacy-option.selected .privacy-card {
+.cg-pill.active {
     border-color: #10b981;
     background: rgba(16, 185, 129, 0.1);
-}
-
-.privacy-option.selected .privacy-card i {
     color: #10b981;
 }
 
-.privacy-card:hover {
-    border-color: #10b981;
-    cursor: pointer;
+/* Senha */
+.cg-password-field {
+    animation: slideDown 0.25s ease;
 }
 
-.password-input-wrapper {
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.cg-password-wrapper {
     position: relative;
 }
 
-.password-toggle {
+.cg-password-wrapper .cg-input {
+    padding-right: 2.5rem;
+}
+
+.cg-password-toggle {
     position: absolute;
-    right: 12px;
+    right: 0;
     top: 50%;
     transform: translateY(-50%);
     background: none;
@@ -385,222 +321,109 @@ textarea.form-control-modern {
     transition: color 0.3s;
 }
 
-.password-toggle:hover {
+.cg-password-toggle:hover {
     color: #10b981;
 }
 
-.form-actions {
-    display: flex;
-    gap: 1rem;
-    margin-top: 2rem;
+/* Erros */
+.cg-error {
+    color: #ef4444;
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
 }
 
-.btn-modern {
-    padding: 0.875rem 1.5rem;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 1rem;
-    border: none;
-    transition: all 0.3s ease;
-    flex: 1;
-    text-decoration: none;
-    text-align: center;
-}
-
-.btn-modern i {
-    margin-right: 0.5rem;
-}
-
-.btn-modern:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
-}
-
-.btn-outline-secondary {
-    background: transparent;
-    border: 2px solid var(--border-color);
-    color: var(--text-muted);
-}
-
-.btn-outline-secondary:hover {
-    background: var(--hover-bg);
-    border-color: var(--text-muted);
-    color: var(--text-primary);
-}
-
-.alert-modern {
-    border-radius: 12px;
-    border: none;
-    padding: 1rem;
-    margin-bottom: 1rem;
+.cg-alert {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    font-size: 0.9rem;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    margin-bottom: 1.25rem;
 }
 
-.form-text {
-    display: block;
-    margin-top: 0.5rem;
-    font-size: 0.875rem;
-    color: var(--text-muted);
-}
-
-.preview-section {
-    background: var(--hover-bg);
-    border-radius: 16px;
-    padding: 2rem;
-    border: 2px solid var(--border-color);
-}
-
-.preview-section h6 {
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 1.5rem;
+/* Botões */
+.cg-actions {
     display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 1rem;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
 }
 
-.preview-section h6 i {
-    color: #10b981;
-}
-
-.group-preview-card {
-    background: var(--card-bg);
-    border-radius: 12px;
-    padding: 1.5rem;
-    border: 2px solid var(--border-color);
-    transition: all 0.3s ease;
-}
-
-.preview-header {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
-
-.preview-icon {
-    width: 60px;
-    height: 60px;
+.cg-btn-create {
+    width: 100%;
+    padding: 0.875rem;
     background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border: none;
     border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.75rem;
-    color: white;
-    flex-shrink: 0;
-}
-
-.preview-info h5 {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin: 0 0 0.5rem 0;
-}
-
-.preview-info p {
-    font-size: 0.875rem;
-    color: var(--text-muted);
-    margin: 0;
-    line-height: 1.4;
-}
-
-.preview-meta {
-    display: flex;
     gap: 0.5rem;
-    flex-wrap: wrap;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border-color);
 }
 
-.badge-public,
-.badge-private,
-.badge-members {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    padding: 0.375rem 0.75rem;
-    border-radius: 8px;
-    font-size: 0.8rem;
-    font-weight: 600;
+.cg-btn-create:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
 }
 
-.badge-public {
-    background: rgba(16, 185, 129, 0.1);
-    color: #10b981;
-}
-
-.badge-private {
-    background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
-}
-
-.badge-members {
-    background: var(--hover-bg);
+.cg-btn-cancel {
+    text-align: center;
     color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.5rem;
+    transition: color 0.3s;
 }
 
-@media (max-width: 992px) {
-    .form-content-wrapper {
-        grid-template-columns: 1fr;
-    }
-
-    .form-card {
-        max-width: 600px;
-    }
-
-    .preview-section {
-        order: -1;
-    }
+.cg-btn-cancel:hover {
+    color: var(--text-primary);
 }
 
+/* Dark theme */
+[data-theme="dark"] .cg-input {
+    color: var(--text-primary);
+}
+
+/* Responsivo */
 @media (max-width: 576px) {
-    .form-card {
-        padding: 2rem 1.5rem;
+    .create-group-page {
+        padding: 1.5rem 1rem;
     }
 
-    .form-icon {
-        width: 64px;
-        height: 64px;
+    .group-icon-circle {
+        width: 68px;
+        height: 68px;
         font-size: 2rem;
     }
 
-    .form-header h2 {
-        font-size: 1.5rem;
-    }
-
-    .privacy-options {
-        grid-template-columns: 1fr;
-    }
-
-    .form-actions {
-        flex-direction: column-reverse;
+    .group-icon-header h2 {
+        font-size: 1.3rem;
     }
 }
 </style>
 
 <script>
-// Preview elements - declare first
-const previewName = document.getElementById('previewName');
-const previewDesc = document.getElementById('previewDesc');
-const previewPrivacy = document.getElementById('previewPrivacy');
-
 // Character counter
 const textarea = document.getElementById('{{ form.descricao.id_for_label }}');
 const charCount = document.getElementById('charCount');
 
 if (textarea && charCount) {
-    // Initialize counter
     charCount.textContent = textarea.value.length;
-
     textarea.addEventListener('input', function() {
         charCount.textContent = this.value.length;
     });
 }
 
-// Show/hide password field based on privacy selection
+// Privacy toggle
 const publicOption = document.getElementById('publicOption');
 const privateOption = document.getElementById('privateOption');
 const passwordField = document.getElementById('passwordField');
@@ -609,25 +432,15 @@ let isPrivate = {{ form.privada.value|yesno:"true,false" }};
 
 function updatePrivacyUI() {
     if (isPrivate) {
-        publicOption.classList.remove('selected');
-        privateOption.classList.add('selected');
+        publicOption.classList.remove('active');
+        privateOption.classList.add('active');
         passwordField.style.display = 'block';
         privadaInput.value = 'on';
-        // Update preview
-        if (previewPrivacy) {
-            previewPrivacy.innerHTML = '<i class="bi bi-lock"></i> Privado';
-            previewPrivacy.className = 'badge-private';
-        }
     } else {
-        publicOption.classList.add('selected');
-        privateOption.classList.remove('selected');
+        publicOption.classList.add('active');
+        privateOption.classList.remove('active');
         passwordField.style.display = 'none';
         privadaInput.value = '';
-        // Update preview
-        if (previewPrivacy) {
-            previewPrivacy.innerHTML = '<i class="bi bi-globe"></i> Público';
-            previewPrivacy.className = 'badge-public';
-        }
     }
 }
 
@@ -641,12 +454,11 @@ privateOption.addEventListener('click', function() {
     updatePrivacyUI();
 });
 
-// Initialize on load
 updatePrivacyUI();
 
 function togglePassword(fieldId) {
     const field = document.getElementById(fieldId);
-    const button = field.parentElement.querySelector('.password-toggle');
+    const button = field.parentElement.querySelector('.cg-password-toggle');
     const icon = button.querySelector('i');
 
     if (field.type === 'password') {
@@ -659,26 +471,5 @@ function togglePassword(fieldId) {
         icon.classList.add('bi-eye');
     }
 }
-
-// Preview update functionality
-const nomeInput = document.getElementById('{{ form.nome.id_for_label }}');
-const descricaoInput = document.getElementById('{{ form.descricao.id_for_label }}');
-
-// Update preview nome
-if (nomeInput && previewName) {
-    nomeInput.addEventListener('input', function() {
-        const value = this.value.trim();
-        previewName.textContent = value || 'Nome do Grupo';
-    });
-}
-
-// Update preview descrição
-if (descricaoInput && previewDesc) {
-    descricaoInput.addEventListener('input', function() {
-        const value = this.value.trim();
-        previewDesc.textContent = value || 'Sem descrição';
-    });
-}
-
 </script>
 {% endblock %}
