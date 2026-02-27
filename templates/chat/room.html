@@ -13,9 +13,17 @@
            data-name="{% if dm.usuario1 == user %}{{ dm.usuario2.username|lower }}{% else %}{{ dm.usuario1.username|lower }}{% endif %}">
             <div class="conversation-avatar">
                 {% if dm.usuario1 == user %}
-                    {{ dm.usuario2.username|slice:":1"|upper }}
+                    {% if dm.usuario2.perfil.foto_perfil %}
+                        <img src="{{ dm.usuario2.perfil.foto_perfil.url }}" alt="{{ dm.usuario2.username }}">
+                    {% else %}
+                        {{ dm.usuario2.username|slice:":1"|upper }}
+                    {% endif %}
                 {% else %}
-                    {{ dm.usuario1.username|slice:":1"|upper }}
+                    {% if dm.usuario1.perfil.foto_perfil %}
+                        <img src="{{ dm.usuario1.perfil.foto_perfil.url }}" alt="{{ dm.usuario1.username }}">
+                    {% else %}
+                        {{ dm.usuario1.username|slice:":1"|upper }}
+                    {% endif %}
                 {% endif %}
             </div>
             <div class="conversation-info">
@@ -29,13 +37,13 @@
                 <div class="conversation-preview">Mensagem privada</div>
             </div>
             <div class="conversation-meta">
-                {% if dm_unread|default_if_none:dict %}
-                    {% with unread_count=dm_unread|get_item:dm.id %}
-                        {% if unread_count and unread_count > 0 %}
-                            <span class="unread-badge">{{ unread_count }}</span>
-                        {% endif %}
-                    {% endwith %}
-                {% endif %}
+                {% with unread_count=dm_unread|get_item:dm.id %}
+                    {% if unread_count and unread_count > 0 %}
+                        <span class="unread-badge" id="dm-unread-{{ dm.id }}">{{ unread_count }}</span>
+                    {% else %}
+                        <span class="unread-badge" id="dm-unread-{{ dm.id }}" style="display:none">0</span>
+                    {% endif %}
+                {% endwith %}
             </div>
         </a>
     {% endfor %}
@@ -87,7 +95,11 @@
 
         <div class="wa-chat-avatar">
             {% if '_' in room_name %}
-                <i class="bi bi-person-fill"></i>
+                {% if other_user.perfil.foto_perfil %}
+                    <img src="{{ other_user.perfil.foto_perfil.url }}" alt="{{ other_user.username }}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+                {% else %}
+                    <i class="bi bi-person-fill"></i>
+                {% endif %}
             {% else %}
                 <i class="bi bi-people-fill"></i>
             {% endif %}
@@ -415,6 +427,7 @@
     // Configuração
     const roomName = "{{ room_name }}";
     const userLogged = "{{ user.username }}";
+    window.currentChatPartner = {% if '_' in room_name %}"{{ other_user.username }}"{% else %}null{% endif %};
     const chatLog = document.querySelector('#chat-log');
     const messageInput = document.querySelector('#chat-message-input');
     const sendButton = document.querySelector('#chat-message-submit');

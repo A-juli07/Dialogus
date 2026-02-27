@@ -153,12 +153,13 @@ def room(request, room_name):
             raise Http404("Sala privada de DM não encontrada.")
 
         MensagemDM.objects.filter(sala_dm=sala_dm, lida=False).exclude(usuario=user).update(lida=True)
+        dm_unread[sala_dm.id] = 0
 
         # Determinar o outro usuário
         other_user = sala_dm.usuario2 if sala_dm.usuario1 == user else sala_dm.usuario1
 
         # Usamos MensagemDM para mensagens privadas
-        mensagens = MensagemDM.objects.filter(sala_dm=sala_dm).order_by('timestamp')[:50]
+        mensagens = list(reversed(list(MensagemDM.objects.filter(sala_dm=sala_dm).order_by('-timestamp')[:50])))
         return render(request, 'chat/room.html', {
             'room_name': room_name,
             'mensagens': mensagens,
@@ -175,8 +176,9 @@ def room(request, room_name):
     if sala.publica or sala.dono == user:
         # Marcar mensagens como lidas
         Mensagem.objects.filter(sala=sala, lida=False).exclude(usuario=user).update(lida=True)
+        sala_unread[sala.id] = 0
 
-        mensagens = Mensagem.objects.filter(sala=sala).order_by('timestamp')[:50]
+        mensagens = list(reversed(list(Mensagem.objects.filter(sala=sala).order_by('-timestamp')[:50])))
         return render(request, 'chat/room.html', {
             'room_name': sala.nome,
             'mensagens': mensagens,
@@ -201,8 +203,9 @@ def room(request, room_name):
 
     # Marcar mensagens como lidas
     Mensagem.objects.filter(sala=sala, lida=False).exclude(usuario=user).update(lida=True)
+    sala_unread[sala.id] = 0
 
-    mensagens = Mensagem.objects.filter(sala=sala).order_by('timestamp')[:50]
+    mensagens = list(reversed(list(Mensagem.objects.filter(sala=sala).order_by('-timestamp')[:50])))
     return render(request, 'chat/room.html', {
         'room_name': sala.nome,
         'mensagens': mensagens,

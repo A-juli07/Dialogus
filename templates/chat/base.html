@@ -500,7 +500,7 @@
                 <div class="nav-divider"></div>
 
                 <!-- Links de Navegação -->
-                <a href="{% url 'index' %}" class="nav-icon {% if request.resolver_match.url_name == 'index' or request.resolver_match.url_name == 'convites' %}active{% endif %}" title="Conversas">
+                <a href="{% url 'index' %}" class="nav-icon {% if request.resolver_match.url_name == 'index' or request.resolver_match.url_name == 'convites' or request.resolver_match.url_name == 'room' %}active{% endif %}" title="Conversas">
                     <i class="bi bi-chat-dots-fill"></i>
                     {% if total_unread > 0 %}
                     <span class="badge-count">{{ total_unread }}</span>
@@ -675,6 +675,14 @@
                 });
             }
 
+            // Limpa badge ao clicar em uma conversa
+            document.querySelectorAll('.conversation-item').forEach(function(item) {
+                item.addEventListener('click', function() {
+                    var badge = this.querySelector('.unread-badge');
+                    if (badge) badge.style.display = 'none';
+                });
+            });
+
             // Mobile: toggle sidebar
             const navIcons = document.querySelectorAll('.nav-icon');
             navIcons.forEach(icon => {
@@ -697,6 +705,68 @@
             }
         });
     </script>
+
+    {% if user.is_authenticated %}
+    <script>
+    (function() {
+        var protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        var notifReconnectTimer;
+
+        function connectNotifSocket() {
+            var notifSocket = new WebSocket(
+                protocol + '//' + window.location.host + '/ws/notifications/{{ user.id }}/'
+            );
+
+            notifSocket.onmessage = function(e) {
+                var data = JSON.parse(e.data);
+                if (data.type !== 'nova_dm') return;
+
+                // Não notifica se já estiver conversando com este usuário
+                var isChattingWithSender = (
+                    typeof window.currentChatPartner !== 'undefined' &&
+                    window.currentChatPartner !== null &&
+                    window.currentChatPartner === data.from_user
+                );
+
+                // Atualiza badge do DM específico no sidebar (room.html e index.html)
+                var dmBadge = document.querySelector('#dm-unread-' + data.sala_id);
+                if (dmBadge && !isChattingWithSender) {
+                    dmBadge.textContent = (parseInt(dmBadge.textContent) || 0) + 1;
+                    dmBadge.style.display = 'flex';
+                }
+
+                if (!isChattingWithSender && typeof Dialogus !== 'undefined') {
+                    Dialogus.NotificationManager.show(
+                        'Nova mensagem de ' + data.from_user,
+                        'info',
+                        5000,
+                        data.unread_count
+                    );
+
+                    // Atualiza badge de mensagens não lidas na nav
+                    var navConversas = document.querySelector('.nav-icon[title="Conversas"]');
+                    if (navConversas) {
+                        var badge = navConversas.querySelector('.badge-count');
+                        if (!badge) {
+                            badge = document.createElement('span');
+                            badge.className = 'badge-count';
+                            navConversas.appendChild(badge);
+                        }
+                        badge.textContent = (parseInt(badge.textContent) || 0) + 1;
+                    }
+                }
+            };
+
+            notifSocket.onclose = function() {
+                clearTimeout(notifReconnectTimer);
+                notifReconnectTimer = setTimeout(connectNotifSocket, 3000);
+            };
+        }
+
+        connectNotifSocket();
+    })();
+    </script>
+    {% endif %}
 
     {% block extra_js %}{% endblock %}
 </body>

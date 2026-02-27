@@ -13,9 +13,17 @@
            data-name="{% if dm.usuario1 == user %}{{ dm.usuario2.username|lower }}{% else %}{{ dm.usuario1.username|lower }}{% endif %}">
             <div class="conversation-avatar">
                 {% if dm.usuario1 == user %}
-                    {{ dm.usuario2.username|slice:":1"|upper }}
+                    {% if dm.usuario2.perfil.foto_perfil %}
+                        <img src="{{ dm.usuario2.perfil.foto_perfil.url }}" alt="{{ dm.usuario2.username }}">
+                    {% else %}
+                        {{ dm.usuario2.username|slice:":1"|upper }}
+                    {% endif %}
                 {% else %}
-                    {{ dm.usuario1.username|slice:":1"|upper }}
+                    {% if dm.usuario1.perfil.foto_perfil %}
+                        <img src="{{ dm.usuario1.perfil.foto_perfil.url }}" alt="{{ dm.usuario1.username }}">
+                    {% else %}
+                        {{ dm.usuario1.username|slice:":1"|upper }}
+                    {% endif %}
                 {% endif %}
             </div>
             <div class="conversation-info">
@@ -445,50 +453,4 @@
 </style>
 {% endblock %}
 
-{% block extra_js %}
-<script>
-    // WebSocket para notificações em tempo real
-    const userId = {{ user.id }};
-    const notificationSocket = new WebSocket(`ws://${window.location.host}/ws/notifications/${userId}/`);
-
-    notificationSocket.onopen = function() {
-        console.log('✅ Conectado ao sistema de notificações');
-    };
-
-    notificationSocket.onmessage = function(e) {
-        const data = JSON.parse(e.data);
-
-        if (data.type === "nova_dm") {
-            const badge = document.querySelector(`#dm-unread-${data.sala_id}`);
-            if (badge) {
-                let atual = parseInt(badge.innerText || "0");
-                badge.innerText = atual + 1;
-                badge.style.display = "flex";
-                badge.style.animation = 'pulse 0.5s ease';
-            }
-
-            // Notificação visual
-            if (typeof Dialogus !== 'undefined') {
-                Dialogus.NotificationManager.show(
-                    `Nova mensagem de ${data.from_user}`,
-                    'info',
-                    3000
-                );
-            }
-        }
-    };
-
-    notificationSocket.onerror = function(error) {
-        console.error('❌ Erro no WebSocket:', error);
-    };
-
-    notificationSocket.onclose = function() {
-        console.log('🔌 WebSocket fechado');
-        setTimeout(() => location.reload(), 5000);
-    };
-
-    window.addEventListener('beforeunload', function() {
-        if (notificationSocket) notificationSocket.close();
-    });
-</script>
 {% endblock %}
