@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from django.contrib import messages
-from django.db.models import Q
+from django.db.models import Q, Max
 from django.contrib.auth.models import User
 
 from .models import Mensagem, MensagemDM, Perfil, Sala, SalaPrivada, Amizade
@@ -15,7 +15,7 @@ def convites(request):
     user = request.user
 
     # DMs ativas (salas privadas)
-    dms = SalaPrivada.objects.filter(Q(usuario1=user) | Q(usuario2=user))
+    dms = SalaPrivada.objects.filter(Q(usuario1=user) | Q(usuario2=user)).annotate(ultima_mensagem=Max('mensagemdm__timestamp')).order_by('-ultima_mensagem')
 
     for dm in dms:
         unread_count = MensagemDM.objects.filter(
@@ -50,7 +50,7 @@ def escolher_sala(request):
     user = request.user
 
     # DMs ativas (para a sidebar)
-    dms = SalaPrivada.objects.filter(Q(usuario1=user) | Q(usuario2=user))
+    dms = SalaPrivada.objects.filter(Q(usuario1=user) | Q(usuario2=user)).annotate(ultima_mensagem=Max('mensagemdm__timestamp')).order_by('-ultima_mensagem')
 
     # Contar mensagens não lidas para cada DM
     dm_unread = {}
@@ -116,7 +116,7 @@ def room(request, room_name):
     user = request.user
 
     # Buscar todas as DMs do usuário para a sidebar
-    dms = SalaPrivada.objects.filter(Q(usuario1=user) | Q(usuario2=user))
+    dms = SalaPrivada.objects.filter(Q(usuario1=user) | Q(usuario2=user)).annotate(ultima_mensagem=Max('mensagemdm__timestamp')).order_by('-ultima_mensagem')
 
     # Contar mensagens não lidas para cada DM
     dm_unread = {}
