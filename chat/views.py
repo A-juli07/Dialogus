@@ -15,7 +15,7 @@ def convites(request):
     user = request.user
 
     # DMs ativas (salas privadas)
-    dms = SalaPrivada.objects.filter(Q(usuario1=user) | Q(usuario2=user)).annotate(ultima_mensagem=Max('mensagemdm__timestamp')).order_by('-ultima_mensagem')
+    dms = SalaPrivada.objects.filter(Q(usuario1=user) | Q(usuario2=user)).select_related('usuario1__perfil', 'usuario2__perfil').annotate(ultima_mensagem=Max('mensagemdm__timestamp')).order_by('-ultima_mensagem')
 
     for dm in dms:
         unread_count = MensagemDM.objects.filter(
@@ -50,13 +50,10 @@ def escolher_sala(request):
     user = request.user
 
     # DMs ativas (para a sidebar)
-    dms = SalaPrivada.objects.filter(Q(usuario1=user) | Q(usuario2=user)).annotate(ultima_mensagem=Max('mensagemdm__timestamp')).order_by('-ultima_mensagem')
+    dms = SalaPrivada.objects.filter(Q(usuario1=user) | Q(usuario2=user)).select_related('usuario1__perfil', 'usuario2__perfil').annotate(ultima_mensagem=Max('mensagemdm__timestamp')).order_by('-ultima_mensagem')
 
-    # Contar mensagens não lidas para cada DM
-    dm_unread = {}
     for dm in dms:
-        count = MensagemDM.objects.filter(sala_dm=dm, lida=False).exclude(usuario=user).count()
-        dm_unread[dm.id] = count
+        dm.unread_count = MensagemDM.objects.filter(sala_dm=dm, lida=False).exclude(usuario=user).count()
 
     # Salas públicas visíveis a todos
     salas_publicas = Sala.objects.filter(publica=True)
@@ -76,11 +73,8 @@ def escolher_sala(request):
     # Todas as salas para a sidebar
     salas = list(salas_publicas) + list(minhas_salas_privadas) + list(salas_autorizadas)
 
-    # Contar mensagens não lidas para cada sala
-    sala_unread = {}
     for sala in salas:
-        count = Mensagem.objects.filter(sala=sala, lida=False).exclude(usuario=user).count()
-        sala_unread[sala.id] = count
+        sala.unread_count = Mensagem.objects.filter(sala=sala, lida=False).exclude(usuario=user).count()
 
     return render(request, 'chat/salas_new.html', {
         'dms': dms,
@@ -88,8 +82,6 @@ def escolher_sala(request):
         'salas_publicas': salas_publicas,
         'minhas_salas_privadas': minhas_salas_privadas,
         'salas_autorizadas': salas_autorizadas,
-        'dm_unread': dm_unread,
-        'sala_unread': sala_unread,
     })
 
 @login_required
@@ -116,13 +108,11 @@ def room(request, room_name):
     user = request.user
 
     # Buscar todas as DMs do usuário para a sidebar
-    dms = SalaPrivada.objects.filter(Q(usuario1=user) | Q(usuario2=user)).annotate(ultima_mensagem=Max('mensagemdm__timestamp')).order_by('-ultima_mensagem')
+    dms = SalaPrivada.objects.filter(Q(usuario1=user) | Q(usuario2=user)).select_related('usuario1__perfil', 'usuario2__perfil').annotate(ultima_mensagem=Max('mensagemdm__timestamp')).order_by('-ultima_mensagem')
 
     # Contar mensagens não lidas para cada DM
-    dm_unread = {}
     for dm in dms:
-        count = MensagemDM.objects.filter(sala_dm=dm, lida=False).exclude(usuario=user).count()
-        dm_unread[dm.id] = count
+        dm.unread_count = MensagemDM.objects.filter(sala_dm=dm, lida=False).exclude(usuario=user).count()
 
     # Buscar todas as salas (grupos) do usuário para a sidebar
     salas_publicas = Sala.objects.filter(publica=True)
@@ -135,17 +125,13 @@ def room(request, room_name):
     salas_autorizadas = Sala.objects.filter(id__in=salas_autorizadas_ids, publica=False).exclude(dono=user)
     salas = list(salas_publicas) + list(minhas_salas_privadas) + list(salas_autorizadas)
 
-    # Contar mensagens não lidas para cada sala
-    sala_unread = {}
     for sala in salas:
-        count = Mensagem.objects.filter(sala=sala, lida=False).exclude(usuario=user).count()
-        sala_unread[sala.id] = count
+        sala.unread_count = Mensagem.objects.filter(sala=sala, lida=False).exclude(usuario=user).count()
 
     # Verifica se é uma sala DM pelo formato esperado "id1_id2"
     if '_' in room_name:
         try:
             id1, id2 = map(int, room_name.split('_'))
-            # Buscar a sala DM com os dois usuários
             sala_dm = SalaPrivada.objects.get(
                 Q(usuario1_id=id1, usuario2_id=id2) | Q(usuario1_id=id2, usuario2_id=id1)
             )
@@ -153,12 +139,11 @@ def room(request, room_name):
             raise Http404("Sala privada de DM não encontrada.")
 
         MensagemDM.objects.filter(sala_dm=sala_dm, lida=False).exclude(usuario=user).update(lida=True)
-        dm_unread[sala_dm.id] = 0
+        for dm in dms:
+            if dm.id == sala_dm.id:
+                dm.unread_count = 0
 
-        # Determinar o outro usuário
         other_user = sala_dm.usuario2 if sala_dm.usuario1 == user else sala_dm.usuario1
-
-        # Usamos MensagemDM para mensagens privadas
         mensagens = list(reversed(list(MensagemDM.objects.filter(sala_dm=sala_dm).order_by('-timestamp')[:50])))
         return render(request, 'chat/room.html', {
             'room_name': room_name,
@@ -166,17 +151,16 @@ def room(request, room_name):
             'dms': dms,
             'salas': salas,
             'other_user': other_user,
-            'dm_unread': dm_unread,
-            'sala_unread': sala_unread,
         })
 
     # Caso contrário, é uma sala de grupo normal (com base no nome da sala)
     sala = get_object_or_404(Sala, nome=room_name)
 
     if sala.publica or sala.dono == user:
-        # Marcar mensagens como lidas
         Mensagem.objects.filter(sala=sala, lida=False).exclude(usuario=user).update(lida=True)
-        sala_unread[sala.id] = 0
+        for s in salas:
+            if s.id == sala.id:
+                s.unread_count = 0
 
         mensagens = list(reversed(list(Mensagem.objects.filter(sala=sala).order_by('-timestamp')[:50])))
         return render(request, 'chat/room.html', {
@@ -185,8 +169,6 @@ def room(request, room_name):
             'dms': dms,
             'salas': salas,
             'other_user': None,
-            'dm_unread': dm_unread,
-            'sala_unread': sala_unread,
         })
 
     if request.method == 'POST':
@@ -201,9 +183,10 @@ def room(request, room_name):
     if not autorizado:
         return render(request, 'chat/verificar_senha.html', {'sala': sala})
 
-    # Marcar mensagens como lidas
     Mensagem.objects.filter(sala=sala, lida=False).exclude(usuario=user).update(lida=True)
-    sala_unread[sala.id] = 0
+    for s in salas:
+        if s.id == sala.id:
+            s.unread_count = 0
 
     mensagens = list(reversed(list(Mensagem.objects.filter(sala=sala).order_by('-timestamp')[:50])))
     return render(request, 'chat/room.html', {
@@ -212,8 +195,6 @@ def room(request, room_name):
         'dms': dms,
         'salas': salas,
         'other_user': None,
-        'dm_unread': dm_unread,
-        'sala_unread': sala_unread,
     })
 
 @login_required

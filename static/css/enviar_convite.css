@@ -1,0 +1,315 @@
+/* ========================================
+   ENVIAR CONVITE — send invite form styles
+   ======================================== */
+
+.invite-page {
+    display: flex;
+    justify-content: center;
+    padding: 2rem 1rem;
+}
+
+.invite-container {
+    max-width: 500px;
+    width: 100%;
+}
+
+/* Header com ícone */
+.invite-icon-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.invite-icon-circle {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1rem;
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.25rem;
+    color: white;
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.3);
+}
+
+.invite-icon-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 0.25rem;
+}
+
+.invite-subtitle {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+/* Campo */
+.inv-field {
+    margin-bottom: 1.25rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.inv-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.inv-label i {
+    color: #8b5cf6;
+    margin-right: 0.25rem;
+}
+
+.inv-search-container {
+    position: relative;
+}
+
+.inv-input {
+    width: 100%;
+    padding: 0.75rem 0;
+    border: none;
+    border-bottom: 2px solid var(--border-color);
+    font-size: 1rem;
+    color: var(--text-primary);
+    background: transparent;
+    transition: border-color 0.3s ease;
+    outline: none;
+}
+
+.inv-input:focus {
+    border-bottom-color: #8b5cf6;
+}
+
+.inv-input::placeholder {
+    color: var(--text-muted);
+    opacity: 0.6;
+}
+
+.inv-hint {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.inv-hint i {
+    color: #8b5cf6;
+    font-size: 0.85rem;
+}
+
+/* Search Results Dropdown */
+.inv-search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    margin-top: 0.5rem;
+    max-height: 280px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    display: none;
+}
+
+.inv-search-results.active {
+    display: block;
+}
+
+.search-result-item {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.search-result-item:hover {
+    background: var(--hover-bg);
+}
+
+.search-result-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.search-result-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.search-result-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.search-result-username {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.search-no-results,
+.search-loading {
+    padding: 1.25rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* Selected User */
+.inv-selected-user {
+    margin-top: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: rgba(139, 92, 246, 0.08);
+    border: 2px solid #8b5cf6;
+    border-radius: 12px;
+    display: none;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.inv-selected-user.active {
+    display: flex;
+}
+
+.selected-user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.selected-user-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.selected-user-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.selected-user-id {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.selected-user-remove {
+    background: none;
+    border: none;
+    color: #ef4444;
+    cursor: pointer;
+    padding: 0.25rem;
+    font-size: 1.1rem;
+    transition: color 0.3s;
+}
+
+.selected-user-remove:hover {
+    color: #dc2626;
+}
+
+/* Botões */
+.inv-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.inv-btn-send {
+    width: 100%;
+    padding: 0.875rem;
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.inv-btn-send:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.35);
+}
+
+.inv-btn-cancel {
+    text-align: center;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.5rem;
+    transition: color 0.3s;
+}
+
+.inv-btn-cancel:hover {
+    color: var(--text-primary);
+}
+
+/* Dark theme */
+[data-theme="dark"] .inv-input {
+    color: var(--text-primary);
+}
+
+/* Responsivo */
+@media (max-width: 576px) {
+    .invite-page {
+        padding: 1.5rem 1rem;
+    }
+
+    .invite-icon-circle {
+        width: 68px;
+        height: 68px;
+        font-size: 2rem;
+    }
+
+    .invite-icon-header h2 {
+        font-size: 1.3rem;
+    }
+}

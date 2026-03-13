@@ -1,0 +1,16 @@
+<a href="{% url 'room' room_name=sala.nome %}"
+   class="conversation-item {% if room_name == sala.nome %}active{% endif %}"
+   data-name="{{ sala.nome|lower }}">
+    <div class="conversation-avatar group">
+        <i class="bi bi-people-fill"></i>
+    </div>
+    <div class="conversation-info">
+        <div class="conversation-name">{{ sala.nome }}</div>
+        <div class="conversation-preview">{% if sala.publica %}Grupo público{% else %}Grupo privado{% endif %}</div>
+    </div>
+    {% if sala.unread_count > 0 %}
+        <div class="conversation-meta">
+            <span class="unread-badge">{{ sala.unread_count }}</span>
+        </div>
+    {% endif %}
+</a>

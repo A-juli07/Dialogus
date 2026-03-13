@@ -1,66 +1,22 @@
 {% extends 'chat/base.html' %}
+{% load static %}
+
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/index.css' %}">{% endblock %}
 
 {% block title %}Início - Dialogus{% endblock %}
 
 {% block sidebar_title %}Conversas{% endblock %}
 
 {% block sidebar_content %}
-<!-- Lista de DMs -->
 {% if dms %}
     {% for dm in dms %}
-        <a href="{% url 'room' room_name=dm.get_nome_sala %}"
-           class="conversation-item"
-           data-name="{% if dm.usuario1 == user %}{{ dm.usuario2.username|lower }}{% else %}{{ dm.usuario1.username|lower }}{% endif %}">
-            <div class="conversation-avatar">
-                {% if dm.usuario1 == user %}
-                    {% if dm.usuario2.perfil.foto_perfil %}
-                        <img src="{{ dm.usuario2.perfil.foto_perfil.url }}" alt="{{ dm.usuario2.username }}">
-                    {% else %}
-                        {{ dm.usuario2.username|slice:":1"|upper }}
-                    {% endif %}
-                {% else %}
-                    {% if dm.usuario1.perfil.foto_perfil %}
-                        <img src="{{ dm.usuario1.perfil.foto_perfil.url }}" alt="{{ dm.usuario1.username }}">
-                    {% else %}
-                        {{ dm.usuario1.username|slice:":1"|upper }}
-                    {% endif %}
-                {% endif %}
-            </div>
-            <div class="conversation-info">
-                <div class="conversation-name">
-                    {% if dm.usuario1 == user %}
-                        {{ dm.usuario2.username }}
-                    {% else %}
-                        {{ dm.usuario1.username }}
-                    {% endif %}
-                </div>
-                <div class="conversation-preview">Mensagem privada</div>
-            </div>
-            {% if dm.unread_count > 0 %}
-                <div class="conversation-meta">
-                    <span class="unread-badge" id="dm-unread-{{ dm.id }}">{{ dm.unread_count }}</span>
-                </div>
-            {% else %}
-                <span id="dm-unread-{{ dm.id }}" class="unread-badge" style="display: none;">0</span>
-            {% endif %}
-        </a>
+        {% include 'chat/components/dm_item.html' %}
     {% endfor %}
 {% endif %}
 
-<!-- Salas/Grupos que o usuário participa -->
 {% if salas_participando %}
     {% for sala in salas_participando %}
-        <a href="{% url 'room' room_name=sala.nome %}"
-           class="conversation-item"
-           data-name="{{ sala.nome|lower }}">
-            <div class="conversation-avatar group">
-                <i class="bi bi-people-fill"></i>
-            </div>
-            <div class="conversation-info">
-                <div class="conversation-name">{{ sala.nome }}</div>
-                <div class="conversation-preview">{% if sala.publica %}Grupo público{% else %}Grupo privado{% endif %}</div>
-            </div>
-        </a>
+        {% include 'chat/components/sala_item.html' %}
     {% endfor %}
 {% endif %}
 
@@ -77,13 +33,11 @@
 
 {% block content %}
 <div class="fade-in">
-    <!-- Header de Boas-vindas -->
     <div class="welcome-header mb-4">
         <h1>Olá, {{ user.username }}!</h1>
         <p>Bem-vindo ao Dialogus. Selecione uma conversa ou explore as opções abaixo.</p>
     </div>
 
-    <!-- Convites Pendentes -->
     {% if convites_recebidos %}
     <div class="section-card mb-4">
         <div class="section-header">
@@ -114,7 +68,6 @@
     </div>
     {% endif %}
 
-    <!-- Ações Rápidas -->
     <div class="quick-actions">
         <a href="{% url 'salas' %}" class="quick-action-card">
             <div class="quick-action-icon">
@@ -161,7 +114,6 @@
         </a>
     </div>
 
-    <!-- Convites Enviados (se houver) -->
     {% if convites_enviados %}
     <div class="section-card mt-4">
         <div class="section-header">
@@ -189,268 +141,4 @@
     </div>
     {% endif %}
 </div>
-
-<style>
-.welcome-header {
-    margin-bottom: 2rem;
-}
-
-.welcome-header h1 {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
-}
-
-.welcome-header p {
-    color: var(--text-muted);
-    font-size: 0.95rem;
-    margin: 0;
-}
-
-/* Section Card */
-.section-card {
-    background: var(--card-bg);
-    border-radius: 16px;
-    padding: 1.5rem;
-    border: 1px solid var(--border-color);
-}
-
-.section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1rem;
-}
-
-.section-header h3 {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin: 0;
-}
-
-.section-header h3 i {
-    color: var(--bg-sidebar);
-}
-
-.badge-count-lg {
-    background: var(--lime-primary);
-    color: var(--bg-sidebar);
-    padding: 0.25rem 0.75rem;
-    border-radius: 12px;
-    font-size: 0.85rem;
-    font-weight: 600;
-}
-
-.badge-count-lg.secondary {
-    background: var(--bg-sidebar);
-    color: white;
-}
-
-/* Invites List */
-.invites-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
-
-.invite-item {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 0.875rem;
-    background: var(--bg-secondary);
-    border-radius: 12px;
-    transition: all 0.3s ease;
-}
-
-.invite-item:hover {
-    background: var(--bg-tertiary);
-}
-
-.invite-avatar {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--lime-primary), var(--lime-secondary));
-    color: var(--bg-sidebar);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    font-size: 1.1rem;
-    flex-shrink: 0;
-}
-
-.invite-avatar.secondary {
-    background: var(--bg-sidebar);
-    color: white;
-}
-
-.invite-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 0.125rem;
-}
-
-.invite-info strong {
-    color: var(--text-primary);
-    font-size: 0.95rem;
-}
-
-.invite-info small {
-    color: var(--text-muted);
-    font-size: 0.8rem;
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-}
-
-.invite-actions {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.btn-accept, .btn-reject {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    transition: all 0.3s ease;
-}
-
-.btn-accept {
-    background: var(--lime-primary);
-    color: var(--bg-sidebar);
-}
-
-.btn-accept:hover {
-    background: var(--lime-secondary);
-    transform: scale(1.1);
-}
-
-.btn-reject {
-    background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
-}
-
-.btn-reject:hover {
-    background: #ef4444;
-    color: white;
-    transform: scale(1.1);
-}
-
-/* Quick Actions */
-.quick-actions {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-}
-
-.quick-action-card {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1.25rem;
-    background: var(--card-bg);
-    border-radius: 16px;
-    border: 1px solid var(--border-color);
-    text-decoration: none;
-    transition: all 0.3s ease;
-}
-
-.quick-action-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-md);
-    border-color: var(--lime-primary);
-}
-
-.quick-action-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 14px;
-    background: var(--bg-sidebar);
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.25rem;
-    flex-shrink: 0;
-}
-
-.quick-action-icon.lime {
-    background: var(--lime-primary);
-    color: var(--bg-sidebar);
-}
-
-.quick-action-icon.purple {
-    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-}
-
-.quick-action-icon.orange {
-    background: linear-gradient(135deg, #f59e0b, #d97706);
-}
-
-.quick-action-content {
-    flex: 1;
-    min-width: 0;
-}
-
-.quick-action-content h4 {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 0.125rem;
-}
-
-.quick-action-content p {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.quick-action-card > i {
-    color: var(--text-muted);
-    font-size: 1rem;
-}
-
-/* Responsivo */
-@media (max-width: 768px) {
-    .quick-actions {
-        grid-template-columns: 1fr;
-    }
-
-    .welcome-header h1 {
-        font-size: 1.5rem;
-    }
-}
-
-/* Tema Escuro */
-[data-theme="dark"] .section-card,
-[data-theme="dark"] .quick-action-card {
-    background: var(--bg-secondary);
-    border-color: var(--bg-tertiary);
-}
-
-[data-theme="dark"] .invite-item {
-    background: var(--bg-tertiary);
-}
-
-[data-theme="dark"] .invite-item:hover {
-    background: rgba(255, 255, 255, 0.05);
-}
-</style>
-{% endblock %}
-
 {% endblock %}

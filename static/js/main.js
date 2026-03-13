@@ -405,6 +405,142 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('🚀 Dialogus iniciado com sucesso!');
 });
 
+// ========== TEMA E WALLPAPER GLOBAIS (usados em base.html) ==========
+function applyTheme(theme) {
+    if (theme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+    }
+    localStorage.setItem('dialogus-theme', theme);
+}
+
+function toggleTheme() {
+    const currentTheme = localStorage.getItem('dialogus-theme') || 'light';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    applyTheme(newTheme);
+}
+
+function applyWallpaper(wallpaper) {
+    document.documentElement.removeAttribute('data-wallpaper');
+    if (wallpaper && wallpaper !== 'default') {
+        document.documentElement.setAttribute('data-wallpaper', wallpaper);
+    }
+}
+
+// ========== INICIALIZAÇÃO DO LAYOUT BASE ==========
+document.addEventListener('DOMContentLoaded', function() {
+    // Carregar tema e wallpaper salvos
+    const savedTheme = localStorage.getItem('dialogus-theme') || 'light';
+    applyTheme(savedTheme);
+
+    const savedWallpaper = localStorage.getItem('wallpaper') || 'default';
+    applyWallpaper(savedWallpaper);
+
+    // Busca na sidebar
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase();
+            document.querySelectorAll('.conversation-item').forEach(item => {
+                const name = item.getAttribute('data-name') || item.textContent.toLowerCase();
+                item.style.display = name.includes(query) ? 'flex' : 'none';
+            });
+        });
+    }
+
+    // Limpa badge ao clicar em uma conversa
+    document.querySelectorAll('.conversation-item').forEach(function(item) {
+        item.addEventListener('click', function() {
+            var badge = this.querySelector('.unread-badge');
+            if (badge) badge.style.display = 'none';
+        });
+    });
+
+    // Mobile: toggle sidebar ao clicar em ícone da nav
+    const navIcons = document.querySelectorAll('.nav-icon');
+    navIcons.forEach(icon => {
+        icon.addEventListener('click', function() {
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebarPanel').classList.add('active');
+            }
+        });
+    });
+});
+
+// Fechar sidebar no mobile ao clicar fora
+document.addEventListener('click', function(e) {
+    if (window.innerWidth <= 768) {
+        const sidebar = document.getElementById('sidebarPanel');
+        const navSidebar = document.querySelector('.nav-sidebar');
+        if (sidebar && navSidebar && !sidebar.contains(e.target) && !navSidebar.contains(e.target)) {
+            sidebar.classList.remove('active');
+        }
+    }
+});
+
+// ========== WEBSOCKET DE NOTIFICAÇÕES ==========
+(function() {
+    const userId = window.DIALOGUS_USER_ID;
+    if (!userId) return;
+
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    let notifReconnectTimer;
+
+    function connectNotifSocket() {
+        var notifSocket = new WebSocket(
+            protocol + '//' + window.location.host + '/ws/notifications/' + userId + '/'
+        );
+
+        notifSocket.onmessage = function(e) {
+            var data = JSON.parse(e.data);
+            if (data.type !== 'nova_dm') return;
+
+            // Não notifica se já estiver conversando com este usuário
+            var isChattingWithSender = (
+                typeof window.currentChatPartner !== 'undefined' &&
+                window.currentChatPartner !== null &&
+                window.currentChatPartner === data.from_user
+            );
+
+            // Atualiza badge do DM específico no sidebar
+            var dmBadge = document.querySelector('#dm-unread-' + data.sala_id);
+            if (dmBadge && !isChattingWithSender) {
+                dmBadge.textContent = (parseInt(dmBadge.textContent) || 0) + 1;
+                dmBadge.style.display = 'flex';
+            }
+
+            if (!isChattingWithSender && typeof Dialogus !== 'undefined') {
+                Dialogus.NotificationManager.show(
+                    'Nova mensagem de ' + data.from_user,
+                    'info',
+                    5000,
+                    data.unread_count
+                );
+
+                // Atualiza badge de mensagens não lidas na nav
+                var navConversas = document.querySelector('.nav-icon[title="Conversas"]');
+                if (navConversas) {
+                    var badge = navConversas.querySelector('.badge-count');
+                    if (!badge) {
+                        badge = document.createElement('span');
+                        badge.className = 'badge-count';
+                        navConversas.appendChild(badge);
+                    }
+                    badge.textContent = (parseInt(badge.textContent) || 0) + 1;
+                }
+            }
+        };
+
+        notifSocket.onclose = function() {
+            clearTimeout(notifReconnectTimer);
+            notifReconnectTimer = setTimeout(connectNotifSocket, 3000);
+        };
+    }
+
+    connectNotifSocket();
+})();
+
 // ========== EXPORTAR PARA USO GLOBAL ==========
 window.Dialogus = {
     ThemeManager,
