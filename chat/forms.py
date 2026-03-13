@@ -1,11 +1,24 @@
 from django import forms
 from .models import Perfil, Sala
 
+ALLOWED_IMAGE_TYPES = {'image/jpeg', 'image/png', 'image/gif', 'image/webp'}
+MAX_PHOTO_SIZE_MB = 5
+
 
 class PerfilForm(forms.ModelForm):
     class Meta:
         model = Perfil
         fields = ['foto_perfil', 'status', 'biografia']
+
+    def clean_foto_perfil(self):
+        foto = self.cleaned_data.get('foto_perfil')
+        if foto and hasattr(foto, 'size'):
+            if foto.size > MAX_PHOTO_SIZE_MB * 1024 * 1024:
+                raise forms.ValidationError(f'A foto não pode ter mais de {MAX_PHOTO_SIZE_MB}MB.')
+            content_type = getattr(foto, 'content_type', '')
+            if content_type and content_type not in ALLOWED_IMAGE_TYPES:
+                raise forms.ValidationError('Apenas imagens JPEG, PNG, GIF e WebP são permitidas.')
+        return foto
 
 
 class SalaForm(forms.ModelForm):

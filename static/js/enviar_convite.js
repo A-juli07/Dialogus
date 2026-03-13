@@ -1,3 +1,9 @@
+function escHtml(str) {
+    const d = document.createElement('div');
+    d.textContent = String(str);
+    return d.innerHTML;
+}
+
 const form = document.getElementById('inviteForm');
 const hiddenInput = document.getElementById('id_destinatario');
 const searchInput = document.getElementById('user_search');
@@ -42,10 +48,10 @@ function searchUsers(query) {
                 const initial = user.first_name ? user.first_name[0].toUpperCase() : user.username[0].toUpperCase();
                 html += `
                     <div class="search-result-item" onclick="selectUser(${JSON.stringify(user).replace(/"/g, '&quot;')})">
-                        <div class="search-result-avatar">${initial}</div>
+                        <div class="search-result-avatar">${escHtml(initial)}</div>
                         <div class="search-result-info">
-                            <p class="search-result-name">${user.full_name}</p>
-                            <p class="search-result-username">@${user.username} • ID: ${user.id}</p>
+                            <p class="search-result-name">${escHtml(user.full_name)}</p>
+                            <p class="search-result-username">@${escHtml(user.username)} • ID: ${escHtml(user.id)}</p>
                         </div>
                     </div>
                 `;
@@ -117,10 +123,10 @@ function showSelectedUser() {
         : selectedUser.username;
 
     selectedUserDiv.innerHTML = `
-        <div class="selected-user-avatar">${initial}</div>
+        <div class="selected-user-avatar">${escHtml(initial)}</div>
         <div class="selected-user-info">
-            <p class="selected-user-name">${fullName}</p>
-            <p class="selected-user-id">@${selectedUser.username} (ID: ${selectedUser.id})</p>
+            <p class="selected-user-name">${escHtml(fullName)}</p>
+            <p class="selected-user-id">@${escHtml(selectedUser.username)} (ID: ${escHtml(selectedUser.id)})</p>
         </div>
         <button type="button" class="selected-user-remove" onclick="clearSelectedUser()">
             <i class="bi bi-x-circle"></i>

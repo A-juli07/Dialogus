@@ -3,9 +3,14 @@ import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-abc123'
-DEBUG = True
-ALLOWED_HOSTS = []
+# Em produção, defina DJANGO_SECRET_KEY como variável de ambiente
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-abc123-use-env-var-in-production')
+
+# Em produção, defina DEBUG=False via variável de ambiente
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
+
+# Em produção, defina como o domínio real: DJANGO_ALLOWED_HOSTS=meusite.com
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -81,3 +86,20 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+
+# ── Segurança ──────────────────────────────────────────────────────────────
+# Protege cookies contra acesso via JavaScript (mitigação de XSS)
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = True
+
+# Impede que o navegador adivinhe o Content-Type dos arquivos (MIME sniffing)
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# Impede que o site seja exibido em iframes (proteção contra clickjacking)
+X_FRAME_OPTIONS = 'DENY'
+
+# Em produção (HTTPS), descomente as linhas abaixo:
+# SESSION_COOKIE_SECURE = True   # Cookies apenas via HTTPS
+# CSRF_COOKIE_SECURE = True      # CSRF apenas via HTTPS
+# SECURE_SSL_REDIRECT = True     # Redireciona HTTP → HTTPS
+# SECURE_HSTS_SECONDS = 31536000 # HTTP Strict Transport Security (1 ano)

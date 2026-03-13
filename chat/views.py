@@ -5,9 +5,18 @@ from django.http import Http404
 from django.contrib import messages
 from django.db.models import Q, Max
 from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password, check_password, is_password_usable
 
 from .models import Mensagem, MensagemDM, Perfil, Sala, SalaPrivada, Amizade
 from .forms import PerfilForm, SalaForm
+
+
+def _verificar_senha_sala(senha_digitada, senha_armazenada):
+    """Suporta tanto senhas em hash (novas) quanto texto puro (legado)."""
+    if is_password_usable(senha_armazenada):
+        return check_password(senha_digitada, senha_armazenada)
+    # Compatibilidade com senhas antigas em texto puro
+    return senha_digitada == senha_armazenada
 
 @login_required
 def convites(request):
@@ -91,6 +100,9 @@ def criar_sala(request):
         if form.is_valid():
             sala = form.save(commit=False)
             sala.dono = request.user
+            # Armazena a senha com hash (nunca em texto puro)
+            if sala.senha:
+                sala.senha = make_password(sala.senha)
             sala.save()
             return redirect('room', room_name=sala.nome)
     else:
@@ -131,12 +143,19 @@ def room(request, room_name):
     # Verifica se é uma sala DM pelo formato esperado "id1_id2"
     if '_' in room_name:
         try:
-            id1, id2 = map(int, room_name.split('_'))
+            parts = room_name.split('_')
+            if len(parts) != 2:
+                raise Http404("Sala não encontrada.")
+            id1, id2 = int(parts[0]), int(parts[1])
             sala_dm = SalaPrivada.objects.get(
                 Q(usuario1_id=id1, usuario2_id=id2) | Q(usuario1_id=id2, usuario2_id=id1)
             )
         except (ValueError, SalaPrivada.DoesNotExist):
             raise Http404("Sala privada de DM não encontrada.")
+
+        # Verifica se o usuário autenticado é participante da DM
+        if user not in [sala_dm.usuario1, sala_dm.usuario2]:
+            raise Http404("Você não tem acesso a esta conversa.")
 
         MensagemDM.objects.filter(sala_dm=sala_dm, lida=False).exclude(usuario=user).update(lida=True)
         for dm in dms:
@@ -172,8 +191,8 @@ def room(request, room_name):
         })
 
     if request.method == 'POST':
-        senha = request.POST.get('senha')
-        if senha == sala.senha:
+        senha = request.POST.get('senha', '')
+        if _verificar_senha_sala(senha, sala.senha):
             request.session[f"sala_{sala.id}_autorizado"] = True
             return redirect('room', room_name=sala.nome)
         else:
@@ -219,7 +238,7 @@ def entrar_sala_privada(request):
 
         try:
             sala = Sala.objects.get(nome=nome, publica=False)
-            if sala.senha == senha:
+            if _verificar_senha_sala(senha, sala.senha):
                 request.session[f"sala_{sala.id}_autorizado"] = True
                 return redirect('room', room_name=nome)
             else:

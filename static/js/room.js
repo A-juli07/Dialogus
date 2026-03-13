@@ -204,9 +204,10 @@ function performSearch() {
                 originalTexts.set(msgEl, msgEl.innerHTML);
             }
 
-            // Aplicar highlight
+            // Escapar o texto antes de usar como innerHTML para evitar XSS
+            const safeText = escapeHtml(text);
             const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-            msgEl.innerHTML = text.replace(regex, '<mark class="search-highlight">$1</mark>');
+            msgEl.innerHTML = safeText.replace(regex, '<mark class="search-highlight">$1</mark>');
 
             // Registrar matches
             const marks = msgEl.querySelectorAll('.search-highlight');
